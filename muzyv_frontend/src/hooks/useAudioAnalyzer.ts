@@ -86,6 +86,13 @@ export const useAudioAnalyzer = (audioFile: File | null) => {
     }
   };
 
+  const stop = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+  };
+
   const resetAudioForRecording = () => {
     if (audioRef.current) {
       audioRef.current.currentTime = 0;
@@ -103,6 +110,7 @@ export const useAudioAnalyzer = (audioFile: File | null) => {
   return { 
     ...state,
     togglePlay,
+    stop,
     resetAudioForRecording,
     restoreAudioAfterRecording
   };
