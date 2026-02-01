@@ -1,0 +1,54 @@
+INFO:     Started server process [16266]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     127.0.0.1:58764 - "GET /health HTTP/1.1" 200 OK
+INFO:__main__:Render request received: preview_mode=True, audio_file=test.mp3, bg_file=test.jpg
+INFO:__main__:Saving files: /home/aiserver/Dev/muzyv/muzyv_backend/temp/test.mp3, /home/aiserver/Dev/muzyv/muzyv_backend/temp/test.jpg
+INFO:__main__:Files saved successfully
+ERROR:__main__:Error reading audio duration: can't sync to MPEG frame
+ERROR:__main__:Error reading audio duration: can't sync to MPEG frame
+INFO:__main__:Running FFmpeg: /home/aiserver/Dev/muzyv/muzyv_backend/bin/ffmpeg -y -stream_loop -1 -i /home/aiserver/Dev/muzyv/muzyv_backend/temp/test.jpg -i /home/aiserver/Dev/muzyv/muzyv_backend/temp/test.mp3 -filter_complex [0:v]scale=1920:1080:force_original_aspect_ratio=increase,crop=1920:1080[bg_scaled];[1:a]showwaves=s=1920x324:mode=line:colors=white[viz];[bg_scaled][viz]overlay=0:H-324[bg_viz];[bg_viz]drawtext=fontfile='/home/aiserver/Dev/muzyv/muzyv_backend/bin/font.ttf':text='Test Track':fontsize=64:fontcolor=white:x=(w-text_w)/2:y=h/2-50:shadowcolor=black:shadowx=2:shadowy=2[txt1];[txt1]drawtext=fontfile='/home/aiserver/Dev/muzyv/muzyv_backend/bin/font.ttf':text='Test Artist':fontsize=48:fontcolor=white:x=(w-text_w)/2:y=h/2+30:shadowcolor=black:shadowx=2:shadowy=2[outv] -map [outv] -map 1:a -c:v libx264 -preset medium -crf 23 -c:a aac -b:a 192k -t 10 /home/aiserver/Dev/muzyv/muzyv_backend/output/render_test.mp3_preview.mp4
+INFO:__main__:Executing FFmpeg command...
+INFO:__main__:FFmpeg command completed with return code: 8
+ERROR:__main__:FFmpeg Error: ffmpeg version 7.0.2-static https://johnvansickle.com/ffmpeg/  Copyright (c) 2000-2024 the FFmpeg developers
+  built with gcc 8 (Debian 8.3.0-6)
+  configuration: --enable-gpl --enable-version3 --enable-static --disable-debug --disable-ffplay --disable-indev=sndio --disable-outdev=sndio --cc=gcc --enable-fontconfig --enable-frei0r --enable-gnutls --enable-gmp --enable-libgme --enable-gray --enable-libaom --enable-libfribidi --enable-libass --enable-libvmaf --enable-libfreetype --enable-libmp3lame --enable-libopencore-amrnb --enable-libopencore-amrwb --enable-libopenjpeg --enable-librubberband --enable-libsoxr --enable-libspeex --enable-libsrt --enable-libvorbis --enable-libopus --enable-libtheora --enable-libvidstab --enable-libvo-amrwbenc --enable-libvpx --enable-libwebp --enable-libx264 --enable-libx265 --enable-libxml2 --enable-libdav1d --enable-libxvid --enable-libzvbi --enable-libzimg
+  libavutil      59.  8.100 / 59.  8.100
+  libavcodec     61.  3.100 / 61.  3.100
+  libavformat    61.  1.100 / 61.  1.100
+  libavdevice    61.  1.100 / 61.  1.100
+  libavfilter    10.  1.100 / 10.  1.100
+  libswscale      8.  1.100 /  8.  1.100
+  libswresample   5.  1.100 /  5.  1.100
+  libpostproc    58.  1.100 / 58.  1.100
+[AVFilterGraph @ 0x3e5224c0] No such filter: 'drawtext'
+Failed to set value '[0:v]scale=1920:1080:force_original_aspect_ratio=increase,crop=1920:1080[bg_scaled];[1:a]showwaves=s=1920x324:mode=line:colors=white[viz];[bg_scaled][viz]overlay=0:H-324[bg_viz];[bg_viz]drawtext=fontfile='/home/aiserver/Dev/muzyv/muzyv_backend/bin/font.ttf':text='Test Track':fontsize=64:fontcolor=white:x=(w-text_w)/2:y=h/2-50:shadowcolor=black:shadowx=2:shadowy=2[txt1];[txt1]drawtext=fontfile='/home/aiserver/Dev/muzyv/muzyv_backend/bin/font.ttf':text='Test Artist':fontsize=48:fontcolor=white:x=(w-text_w)/2:y=h/2+30:shadowcolor=black:shadowx=2:shadowy=2[outv]' for option 'filter_complex': Filter not found
+Error parsing global options: Filter not found
+
+DEBUG: Render request received - audio: test.mp3, bg: test.jpg, preview: True
+DEBUG: Saving files - audio: /home/aiserver/Dev/muzyv/muzyv_backend/temp/test.mp3, bg: /home/aiserver/Dev/muzyv/muzyv_backend/temp/test.jpg
+DEBUG: Files saved successfully
+DEBUG COMMAND: /home/aiserver/Dev/muzyv/muzyv_backend/bin/ffmpeg -y -stream_loop -1 -i /home/aiserver/Dev/muzyv/muzyv_backend/temp/test.jpg -i /home/aiserver/Dev/muzyv/muzyv_backend/temp/test.mp3 -filter_complex [0:v]scale=1920:1080:force_original_aspect_ratio=increase,crop=1920:1080[bg_scaled];[1:a]showwaves=s=1920x324:mode=line:colors=white[viz];[bg_scaled][viz]overlay=0:H-324[bg_viz];[bg_viz]drawtext=fontfile='/home/aiserver/Dev/muzyv/muzyv_backend/bin/font.ttf':text='Test Track':fontsize=64:fontcolor=white:x=(w-text_w)/2:y=h/2-50:shadowcolor=black:shadowx=2:shadowy=2[txt1];[txt1]drawtext=fontfile='/home/aiserver/Dev/muzyv/muzyv_backend/bin/font.ttf':text='Test Artist':fontsize=48:fontcolor=white:x=(w-text_w)/2:y=h/2+30:shadowcolor=black:shadowx=2:shadowy=2[outv] -map [outv] -map 1:a -c:v libx264 -preset medium -crf 23 -c:a aac -b:a 192k -t 10 /home/aiserver/Dev/muzyv/muzyv_backend/output/render_test.mp3_preview.mp4
+DEBUG FILTER_COMPLEX: [0:v]scale=1920:1080:force_original_aspect_ratio=increase,crop=1920:1080[bg_scaled];[1:a]showwaves=s=1920x324:mode=line:colors=white[viz];[bg_scaled][viz]overlay=0:H-324[bg_viz];[bg_viz]drawtext=fontfile='/home/aiserver/Dev/muzyv/muzyv_backend/bin/font.ttf':text='Test Track':fontsize=64:fontcolor=white:x=(w-text_w)/2:y=h/2-50:shadowcolor=black:shadowx=2:shadowy=2[txt1];[txt1]drawtext=fontfile='/home/aiserver/Dev/muzyv/muzyv_backend/bin/font.ttf':text='Test Artist':fontsize=48:fontcolor=white:x=(w-text_w)/2:y=h/2+30:shadowcolor=black:shadowx=2:shadowy=2[outv]
+DEBUG: Using GPU: False
+DEBUG: Executing FFmpeg command...
+DEBUG: FFmpeg command completed with return code: 8
+DEBUG: FFmpeg Error - ffmpeg version 7.0.2-static https://johnvansickle.com/ffmpeg/  Copyright (c) 2000-2024 the FFmpeg developers
+  built with gcc 8 (Debian 8.3.0-6)
+  configuration: --enable-gpl --enable-version3 --enable-static --disable-debug --disable-ffplay --disable-indev=sndio --disable-outdev=sndio --cc=gcc --enable-fontconfig --enable-frei0r --enable-gnutls --enable-gmp --enable-libgme --enable-gray --enable-libaom --enable-libfribidi --enable-libass --enable-libvmaf --enable-libfreetype --enable-libmp3lame --enable-libopencore-amrnb --enable-libopencore-amrwb --enable-libopenjpeg --enable-librubberband --enable-libsoxr --enable-libspeex --enable-libsrt --enable-libvorbis --enable-libopus --enable-libtheora --enable-libvidstab --enable-libvo-amrwbenc --enable-libvpx --enable-libwebp --enable-libx264 --enable-libx265 --enable-libxml2 --enable-libdav1d --enable-libxvid --enable-libzvbi --enable-libzimg
+  libavutil      59.  8.100 / 59.  8.100
+  libavcodec     61.  3.100 / 61.  3.100
+  libavformat    61.  1.100 / 61.  1.100
+  libavdevice    61.  1.100 / 61.  1.100
+  libavfilter    10.  1.100 / 10.  1.100
+  libswscale      8.  1.100 /  8.  1.100
+  libswresample   5.  1.100 /  5.  1.100
+  libpostproc    58.  1.100 / 58.  1.100
+[AVFilterGraph @ 0x3e5224c0] No such filter: 'drawtext'
+Failed to set value '[0:v]scale=1920:1080:force_original_aspect_ratio=increase,crop=1920:1080[bg_scaled];[1:a]showwaves=s=1920x324:mode=line:colors=white[viz];[bg_scaled][viz]overlay=0:H-324[bg_viz];[bg_viz]drawtext=fontfile='/home/aiserver/Dev/muzyv/muzyv_backend/bin/font.ttf':text='Test Track':fontsize=64:fontcolor=white:x=(w-text_w)/2:y=h/2-50:shadowcolor=black:shadowx=2:shadowy=2[txt1];[txt1]drawtext=fontfile='/home/aiserver/Dev/muzyv/muzyv_backend/bin/font.ttf':text='Test Artist':fontsize=48:fontcolor=white:x=(w-text_w)/2:y=h/2+30:shadowcolor=black:shadowx=2:shadowy=2[outv]' for option 'filter_complex': Filter not found
+Error parsing global options: Filter not found
+
+INFO:     127.0.0.1:38074 - "POST /render HTTP/1.1" 500 Internal Server Error
+INFO:     127.0.0.1:48628 - "HEAD /health HTTP/1.1" 405 Method Not Allowed
+INFO:     127.0.0.1:48642 - "GET /health HTTP/1.1" 200 OK
