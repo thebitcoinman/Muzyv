@@ -90,6 +90,13 @@ export const Visualizer = forwardRef<HTMLCanvasElement, VisualizerProps>(({
     bgVideoRef.current = vid;
     const processFrames = async () => {
       onProcessingChange?.(true); yoyoFramesRef.current = []; vid.pause(); vid.currentTime = 0;
+      
+      // Safety timeout to prevent infinite sticking
+      const safetyTimeout = setTimeout(() => {
+        console.warn("Yo-Yo capture timed out");
+        onProcessingChange?.(false);
+      }, 15000);
+
       try {
         await new Promise<void>((resolve, reject) => {
           const onLoaded = () => { vid.removeEventListener('loadedmetadata', onLoaded); resolve(); };
@@ -98,16 +105,30 @@ export const Visualizer = forwardRef<HTMLCanvasElement, VisualizerProps>(({
         videoDurationRef.current = vid.duration || 1;
         await vid.play();
         const captureFrame = async () => {
-          if (vid.ended || vid.currentTime >= vid.duration - 0.05 || yoyoFramesRef.current.length > 300) { onProcessingChange?.(false); return; }
+          if (vid.ended || vid.currentTime >= vid.duration - 0.05 || yoyoFramesRef.current.length > 300) { 
+            clearTimeout(safetyTimeout);
+            onProcessingChange?.(false); 
+            return; 
+          }
           const bitmap = await createImageBitmap(vid, { resizeWidth: Math.min(w || 1920, 1280), resizeHeight: Math.min(h || 1080, 720) });
           yoyoFramesRef.current.push(bitmap);
-          if (vid.paused) return; 
+          
+          if (vid.paused) {
+             // If video paused unexpectedly, stop capturing
+             clearTimeout(safetyTimeout);
+             onProcessingChange?.(false);
+             return;
+          } 
           if ('requestVideoFrameCallback' in vid) (vid as any).requestVideoFrameCallback(captureFrame);
           else requestAnimationFrame(captureFrame);
         };
         if ('requestVideoFrameCallback' in vid) (vid as any).requestVideoFrameCallback(captureFrame);
         else requestAnimationFrame(captureFrame);
-      } catch (e) { console.error(e); onProcessingChange?.(false); }
+      } catch (e) { 
+        console.error(e); 
+        clearTimeout(safetyTimeout);
+        onProcessingChange?.(false); 
+      }
     };
     processFrames();
     return () => { yoyoFramesRef.current.forEach(b => b.close()); yoyoFramesRef.current = []; };

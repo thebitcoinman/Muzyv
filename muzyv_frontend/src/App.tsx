@@ -241,13 +241,13 @@ function App() {
           </div>
           <div className="header-controls">
             <button className="btn-icon" onClick={togglePlay} disabled={!audioFile} title="Play/Pause">
-              {isPlaying ? <Pause size={20} /> : <Play size={20} />}
+              {isPlaying ? <Pause size={20} fill="currentColor" stroke="none" /> : <Play size={20} fill="currentColor" stroke="none" />}
             </button>
             <button className="btn-icon" onClick={stop} disabled={!audioFile} title="Stop">
-              <Square size={16} />
+              <Square size={16} fill="currentColor" stroke="none" />
             </button>
             <button className="btn-icon" onClick={handleRandomize} title="Randomize">
-              <Shuffle size={20} />
+              <Shuffle size={20} strokeWidth={2.5} />
             </button>
           </div>
         </div>
