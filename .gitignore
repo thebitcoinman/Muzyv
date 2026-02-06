@@ -55,3 +55,17 @@ muzyv_backend/output/
 .vscode/
 *.swp
 *.swo
+
+# Log files
+*.log
+**/*.log
+frontend_manual.log
+backend.log
+frontend.log
+
+# Binary files and large directories
+muzyv_backend/bin/
+muzyv_backend/venv_fix/
+
+# Temporary files
+conductor/
