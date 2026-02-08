@@ -6,6 +6,7 @@ interface AudioState {
   sourceNode: MediaElementAudioSourceNode | null;
   analyser: AnalyserNode | null;
   audioElement: HTMLAudioElement | null;
+  gainNode: GainNode | null;
 }
 
 export const useAudioAnalyzer = (audioFile: File | null) => {
@@ -14,16 +15,28 @@ export const useAudioAnalyzer = (audioFile: File | null) => {
     audioContext: null,
     sourceNode: null,
     analyser: null,
-    audioElement: null
+    audioElement: null,
+    gainNode: null
   });
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [isMuted, setIsMuted] = useState(false);
 
-  // Refs for cleanup
+  // Refs for cleanup and direct manipulation
   const contextRef = useRef<AudioContext | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const gainRef = useRef<GainNode | null>(null);
+
+  // Sync isMuted with gainNode
+  useEffect(() => {
+    if (gainRef.current) {
+      gainRef.current.gain.value = isMuted ? 0 : 1;
+    }
+  }, [isMuted]);
 
   useEffect(() => {
+    let interval: number;
     if (audioFile) {
-      // Cleanup previous
       if (audioRef.current) {
         audioRef.current.pause();
         URL.revokeObjectURL(audioRef.current.src);
@@ -36,6 +49,16 @@ export const useAudioAnalyzer = (audioFile: File | null) => {
       audio.loop = true;
       audioRef.current = audio;
 
+      audio.onloadedmetadata = () => {
+        setDuration(audio.duration);
+      };
+
+      interval = window.setInterval(() => {
+        if (audioRef.current) {
+          setCurrentTime(audioRef.current.currentTime);
+        }
+      }, 100);
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
       const ctx = new AudioContextClass();
@@ -44,35 +67,42 @@ export const useAudioAnalyzer = (audioFile: File | null) => {
       const ana = ctx.createAnalyser();
       ana.fftSize = 2048; 
 
+      const gain = ctx.createGain();
+      gain.gain.value = isMuted ? 0 : 1;
+      gainRef.current = gain;
+
       const source = ctx.createMediaElementSource(audio);
       source.connect(ana);
-      ana.connect(ctx.destination);
+      ana.connect(gain);
+      gain.connect(ctx.destination);
 
-      // Handle play/pause state
-      audio.onplay = () => setState(prev => ({ ...prev, isPlaying: true }));
-      audio.onpause = () => setState(prev => ({ ...prev, isPlaying: false }));
-      audio.onended = () => setState(prev => ({ ...prev, isPlaying: false }));
+      const handlePlay = () => setState(prev => ({ ...prev, isPlaying: true }));
+      const handlePause = () => setState(prev => ({ ...prev, isPlaying: false }));
+      const handleEnded = () => setState(prev => ({ ...prev, isPlaying: false }));
 
-      // Update state once
-      // eslint-disable-next-line react-hooks/set-state-in-effect
+      audio.addEventListener('play', handlePlay);
+      audio.addEventListener('pause', handlePause);
+      audio.addEventListener('ended', handleEnded);
+
       setState({
         isPlaying: false,
         audioContext: ctx,
         sourceNode: source,
         analyser: ana,
-        audioElement: audio
+        audioElement: audio,
+        gainNode: gain
       });
-    }
 
-    return () => {
-      if (contextRef.current) {
-        contextRef.current.close();
-      }
-      if (audioRef.current) {
-        audioRef.current.pause();
-        URL.revokeObjectURL(audioRef.current.src);
-      }
-    };
+      return () => {
+        if (interval) clearInterval(interval);
+        audio.removeEventListener('play', handlePlay);
+        audio.removeEventListener('pause', handlePause);
+        audio.removeEventListener('ended', handleEnded);
+        audio.pause();
+        URL.revokeObjectURL(audio.src);
+        if (contextRef.current) contextRef.current.close();
+      };
+    }
   }, [audioFile]);
 
   const togglePlay = () => {
@@ -90,6 +120,26 @@ export const useAudioAnalyzer = (audioFile: File | null) => {
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
+      setCurrentTime(0);
+    }
+  };
+
+  const seek = (time: number) => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = time;
+      setCurrentTime(time);
+    }
+  };
+
+  const muteOutput = () => {
+    if (gainRef.current) {
+      gainRef.current.gain.value = 0;
+    }
+  };
+
+  const unmuteOutput = () => {
+    if (gainRef.current && !isMuted) {
+      gainRef.current.gain.value = 1;
     }
   };
 
@@ -97,21 +147,34 @@ export const useAudioAnalyzer = (audioFile: File | null) => {
     if (audioRef.current) {
       audioRef.current.currentTime = 0;
       audioRef.current.loop = false;
-      audioRef.current.pause();
+      // We don't pause here because handleStartRecording will manage play/pause
     }
+    muteOutput();
   };
 
   const restoreAudioAfterRecording = () => {
     if (audioRef.current) {
       audioRef.current.loop = true;
     }
+    unmuteOutput();
+  };
+
+  const toggleMute = () => {
+    setIsMuted(prev => !prev);
   };
 
   return { 
     ...state,
+    currentTime,
+    duration,
+    isMuted,
     togglePlay,
+    toggleMute,
     stop,
+    seek,
     resetAudioForRecording,
-    restoreAudioAfterRecording
+    restoreAudioAfterRecording,
+    muteOutput,
+    unmuteOutput
   };
 };

@@ -1,73 +1,45 @@
-# React + TypeScript + Vite
+# Muzyv - Professional Audio Visualizer
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Muzyv is a high-performance, client-side audio visualization application built with React, the Web Audio API, and the Canvas API. It allows users to create stunning, high-resolution music videos directly in their browser with no backend processing required.
 
-Currently, two official plugins are available:
+## 🚀 Key Features
+- **Client-Side Rendering:** Uses `MediaRecorder` and `Canvas.captureStream()` to export high-quality `.webm` videos.
+- **31+ Advanced Visualizers:** From classic spectrum bars to complex fractal trees and 3D-simulated environments.
+- **Dynamic Yo-Yo Looping:** Automatically captures and creates seamless back-and-forth loops for background videos.
+- **70+ Typography Options:** Extensive Google Fonts integration with audio-reactive text effects (Pulse, Jitter, Bounce).
+- **Master FX Suite:** Real-time glitch, RGB shift, shake, kaleidoscope, and vignette post-processing.
+- **Responsive Navigation:** Interactive progress bar and time-scrubbing for precise visualization control.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🎨 Visualizer Library
+1.  **Spectrum:** Classic frequency bar visualization.
+2.  **Wave/Dual Wave:** Time-domain oscilloscopes.
+3.  **DNA Helix:** Reactive double-helix structure.
+4.  **3D Geometry:** Cubes, spheres, and bars with depth simulation.
+5.  **Nature-Inspired:** Fractal trees and floating orbs.
+6.  **Cyber-Aesthetic:** Matrix rain, neon grids, and cyber rings.
+7.  **Particle Systems:** Audio-reactive particle storms and starfields.
 
-## React Compiler
+## 🛠 Tech Stack
+- **Frontend:** React + TypeScript + Vite
+- **Audio:** Web Audio API (AnalyserNode, MediaElementSource)
+- **Graphics:** HTML5 Canvas (2D Context)
+- **Export:** MediaRecorder API with VP9 encoding
+- **Icons:** Lucide React
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 📖 Core Functions
+### `useAudioAnalyzer` (Hook)
+Manages the `AudioContext`, frequency analysis, and state synchronization.
+- `togglePlay/stop`: Controls playback.
+- `seek(time)`: Navigates the audio track.
+- `muteOutput/unmuteOutput`: Routes audio between speakers and the recording destination.
 
-## Expanding the ESLint configuration
+### `Visualizer` (Component)
+The core rendering engine using `requestAnimationFrame`.
+- **Yo-Yo Logic:** Captures `ImageBitmap` frames from video backgrounds to create seamless, frame-perfect loops synchronized to the original video FPS.
+- **Render Loop:** Composites background, audio-reactive layers, typography, and post-FX in a single pass.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### `handleStartRecording`
+Orchestrates the export process by connecting the audio source to a `MediaStreamDestination` and capturing the canvas stream at a fixed bitrate (8Mbps) for high-quality output.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+---
+Built with 💜 by Muzyv.
