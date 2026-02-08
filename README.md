@@ -2,9 +2,14 @@
 
 <div align="center">
 
+
 ![Muzyv Logo](https://img.shields.io/badge/Muzyv-Audio%20Visualizer-FF6B6B?style=for-the-badge&logo=musicbrainz&logoColor=white)
 
 **Professional Audio Visualizer | High-Performance | Client-Side Processing**
+
+
+![Screenshot 2026-02-08 070034.png](https://files.peakd.com/file/peakd-hive/bitcoinman/EowDhpFRxocgj3i4GuokZAdnvNjGRPbyivapXefb84KQHRc4cmwcbjt9y6EWzfK54tg.png)
+
 
 [![GitHub stars](https://img.shields.io/github/stars/thebitcoinman/Muzyv?style=social)](https://github.com/thebitcoinman/Muzyv/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/thebitcoinman/Muzyv?style=social)](https://github.com/thebitcoinman/Muzyv/network)
