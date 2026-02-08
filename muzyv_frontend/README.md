@@ -41,5 +41,99 @@ The core rendering engine using `requestAnimationFrame`.
 ### `handleStartRecording`
 Orchestrates the export process by connecting the audio source to a `MediaStreamDestination` and capturing the canvas stream at a fixed bitrate (8Mbps) for high-quality output.
 
+## 🐳 Docker Deployment
+
+### Quick Start with Docker Desktop (Recommended)
+
+1. **Prerequisites:**
+   - Docker Desktop installed on your system
+   - Git installed
+
+2. **Clone and run:**
+   ```bash
+   git clone https://github.com/thebitcoinman/Muzyv.git
+   cd Muzyv
+   docker-compose up -d
+   ```
+   
+3. **Access the application:**
+   Open your browser and navigate to `http://localhost:3000`
+
+4. **To stop the application:**
+   ```bash
+   docker-compose down
+   ```
+
+### DIY Route - Manual Docker Build
+
+1. **Prerequisites:**
+   - Docker Engine installed
+   - Git installed
+   - Node.js 18+ (for development only)
+
+2. **Clone the repository:**
+   ```bash
+   git clone https://github.com/thebitcoinman/Muzyv.git
+   cd Muzyv
+   ```
+
+3. **Build the Docker image:**
+   ```bash
+   docker build -t muzyv-frontend .
+   ```
+
+4. **Run the container:**
+   ```bash
+   docker run -d -p 3000:80 --name muzyv-frontend muzyv-frontend
+   ```
+
+5. **Access the application:**
+   Open your browser and navigate to `http://localhost:3000`
+
+6. **To stop and remove the container:**
+   ```bash
+   docker stop muzyv-frontend
+   docker rm muzyv-frontend
+   ```
+
+### Dependencies & Requirements
+
+**For Docker Deployment:**
+- Docker Desktop (Windows/Mac) or Docker Engine (Linux)
+- Minimum 2GB RAM
+- 500MB disk space
+
+**For Development/Manual Build:**
+- Node.js 18+ LTS
+- npm 8+
+- Git
+
+**Browser Requirements:**
+- Modern browser with Web Audio API support
+- Chrome/Edge 88+, Firefox 85+, Safari 14+
+
+### Production Notes
+
+- The Docker container uses Nginx to serve static files efficiently
+- Built-in security headers for production deployment
+- Optimized caching for static assets
+- Single-page application with proper routing fallbacks
+
+### Troubleshooting
+
+**Port already in use?**
+```bash
+# Use a different port
+docker run -d -p 3001:80 --name muzyv-frontend muzyv-frontend
+```
+
+**Build fails with TypeScript errors?**
+The Docker build skips TypeScript checking for production builds. If you want to develop locally:
+```bash
+cd muzyv_frontend
+npm install
+npm run dev
+```
+
 ---
 Built with 💜 by Muzyv.
