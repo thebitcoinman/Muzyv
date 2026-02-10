@@ -38,6 +38,7 @@ yarn-error.log
 .pnpm-debug.log
 muzyv_frontend/node_modules/
 muzyv_frontend/dist/
+muzyv_frontend/.vite/
 
 # Project Specific
 muzyv_backend/temp/

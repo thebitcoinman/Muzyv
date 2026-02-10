@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Music, Image as ImageIcon, Play, Pause, Shuffle, Loader2, Square, Zap, Type, Film, Sliders, Maximize, Move, Volume2, VolumeX } from 'lucide-react';
+import { Music, Image as ImageIcon, Play, Pause, Shuffle, Loader2, Square, Zap, Type, Film, Sliders, Maximize, Move, Volume2, VolumeX, RefreshCw, Shield } from 'lucide-react';
 import { useAudioAnalyzer } from './hooks/useAudioAnalyzer';
 import { Visualizer } from './components/Visualizer';
 import './App.css';
@@ -78,7 +78,6 @@ const FONT_OPTIONS = [
   { label: 'Unica One', value: 'Unica One' },
   { label: 'Wallpoet', value: 'Wallpoet' },
   { label: 'Yellowtail', value: 'Yellowtail' },
-  { label: 'Bungee Spice', value: 'Bungee Shade' },
   { label: 'DotGothic16', value: 'DotGothic16' },
   { label: 'Major Mono Display', value: 'Major Mono Display' },
   { label: 'Michroma', value: 'Michroma' },
@@ -105,7 +104,6 @@ const PRESET_POSITIONS = [
 ];
 
 const VIZ_OPTIONS = [
-  // Classic & Bars
   { label: '1. Spectrum Bars', value: 'spectrum' },
   { label: '2. Mirror Spectrum', value: 'mirror_spectrum' },
   { label: '3. 3D Floor Bars', value: 'bars_3d' },
@@ -113,10 +111,8 @@ const VIZ_OPTIONS = [
   { label: '5. Cyber City', value: 'cyber_city' },
   { label: '6. Pixel Blocks', value: 'pixel_blocks' },
   { label: '7. Digital Rain', value: 'digital_rain' },
-  { label: '8. LED Wall', value: 'led_wall' }, // New
-  { label: '9. Segmented Bar', value: 'segmented_bar' }, // New
-  
-  // Waveforms & Lines
+  { label: '8. LED Wall', value: 'led_wall' },
+  { label: '9. Segmented Bar', value: 'segmented_bar' },
   { label: '10. Classic Wave', value: 'wave' },
   { label: '11. Dual Wave', value: 'dual_wave' },
   { label: '12. Wave Ribbon', value: 'ribbon' },
@@ -125,9 +121,7 @@ const VIZ_OPTIONS = [
   { label: '15. Glitch Vines', value: 'glitch_vines' },
   { label: '16. Heartbeat (EKG)', value: 'heartbeat' },
   { label: '17. Cosmic Strings', value: 'cosmic_strings' },
-  { label: '18. Seismic', value: 'seismic' }, // New
-  
-  // Circular & Radial
+  { label: '18. Seismic', value: 'seismic' },
   { label: '19. Circular Spectrum', value: 'circle' },
   { label: '20. Concentric Rings', value: 'ring' },
   { label: '21. Pulse Circle', value: 'pulse' },
@@ -136,46 +130,39 @@ const VIZ_OPTIONS = [
   { label: '24. Cyber Rings', value: 'rings_cyber' },
   { label: '25. Spiral Galaxy', value: 'spiral' },
   { label: '26. Orbitals', value: 'orbitals' },
-  { label: '27. Radar Scan', value: 'radar' }, // New
-  { label: '28. Mandala', value: 'mandala' }, // New
-
-  // 3D & Geometry
+  { label: '27. Radar Scan', value: 'radar' },
+  { label: '28. Mandala', value: 'mandala' },
   { label: '29. 3D Cubes', value: 'cubes_3d' },
   { label: '30. 3D Sphere', value: 'sphere_3d' },
   { label: '31. 3D Tunnel', value: 'tunnel_3d' },
   { label: '32. Neon Grid', value: 'neon_grid' },
   { label: '33. Hexagon Grid', value: 'hexagon' },
   { label: '34. Polygon World', value: 'poly_world' },
-  { label: '35. Geometric Chaos', value: 'geo_chaos' },
-  { label: '36. Pyramids', value: 'pyramids' }, // New
-  { label: '37. Crystal', value: 'crystal' }, // New
-
-  // Abstract & Particles
-  { label: '38. Starfield', value: 'starfield' },
-  { label: '39. Particles', value: 'particles' },
-  { label: '40. Shockwave', value: 'shockwave' },
-  { label: '41. Gravity Well', value: 'gravity_well' },
-  { label: '42. Star Burst', value: 'star_burst' },
-  { label: '43. Vortex', value: 'vortex' },
-  { label: '44. Vector Field', value: 'vector_field' },
-  { label: '45. Swarm', value: 'swarm' }, // New
-
-  // Nature & Organic
-  { label: '46. DNA Helix', value: 'dna' },
-  { label: '47. Lava Lamp', value: 'lava' },
-  { label: '48. Plasma Ball', value: 'plasma' },
-  { label: '49. Fractal Tree', value: 'fractal_tree' },
-  { label: '50. Floating Orbs', value: 'floating_orbs' },
-  { label: '51. Liquid Flow', value: 'liquid_flow' },
-  { label: '52. Aurora', value: 'aurora' },
-  { label: '53. Deep Sea', value: 'deep_sea' },
-  { label: '54. Abstract Clouds', value: 'abstract_clouds' },
-  { label: '55. Solar Flare', value: 'solar_flare' },
-  { label: '56. Kaleido Mesh', value: 'kaleido_mesh' },
-  { label: '57. Techno Wires', value: 'techno_wires' },
-  { label: '58. Neural Net', value: 'neural_net' },
-  { label: '59. Matrix Rain', value: 'matrix' },
-  { label: '60. Fire', value: 'fire' }, // New
+  { label: '35. Pyramids', value: 'pyramids' },
+  { label: '36. Crystal', value: 'crystal' },
+  { label: '37. Starfield', value: 'starfield' },
+  { label: '38. Particles', value: 'particles' },
+  { label: '39. Shockwave', value: 'shockwave' },
+  { label: '40. Gravity Well', value: 'gravity_well' },
+  { label: '41. Star Burst', value: 'star_burst' },
+  { label: '42. Vortex', value: 'vortex' },
+  { label: '43. Vector Field', value: 'vector_field' },
+  { label: '44. Swarm', value: 'swarm' },
+  { label: '45. DNA Helix', value: 'dna' },
+  { label: '46. Lava Lamp', value: 'lava' },
+  { label: '47. Plasma Ball', value: 'plasma' },
+  { label: '48. Fractal Tree', value: 'fractal_tree' },
+  { label: '49. Floating Orbs', value: 'floating_orbs' },
+  { label: '50. Liquid Flow', value: 'liquid_flow' },
+  { label: '51. Aurora', value: 'aurora' },
+  { label: '52. Deep Sea', value: 'deep_sea' },
+  { label: '53. Abstract Clouds', value: 'abstract_clouds' },
+  { label: '54. Solar Flare', value: 'solar_flare' },
+  { label: '55. Kaleido Mesh', value: 'kaleido_mesh' },
+  { label: '56. Techno Wires', value: 'techno_wires' },
+  { label: '57. Neural Net', value: 'neural_net' },
+  { label: '58. Matrix Rain', value: 'matrix' },
+  { label: '59. Fire', value: 'fire' },
 ];
 
 const FADE_OPTIONS = [
@@ -201,7 +188,6 @@ function App() {
   const [bgUrl, setBgUrl] = useState<string | null>(null);
   const [bgType, setBgType] = useState<'image' | 'video' | 'none'>('none');
   
-  // Background Transformations
   const [bgZoom, setBgZoom] = useState(1.0);
   const [bgOffsetX, setBgOffsetX] = useState(50);
   const [bgOffsetY, setBgOffsetY] = useState(50);
@@ -214,7 +200,11 @@ function App() {
   const [barColor, setBarColor] = useState('#ffffff');
   const [barColorEnd, setBarColorEnd] = useState('#8b5cf6');
   const [useGradient, setUseGradient] = useState(false);
+  const [vizGradientMotion, setVizGradientMotion] = useState(false);
   const [textColor, setTextColor] = useState('#ffffff');
+  const [textColorEnd, setTextColorEnd] = useState('#8b5cf6');
+  const [useTextGradient, setUseTextGradient] = useState(false);
+  const [textGradientMotion, setTextGradientMotion] = useState(false);
   const [resolution, setResolution] = useState('1920x1080');
   
   const [vizScale, setVizScale] = useState(1.0);
@@ -222,7 +212,8 @@ function App() {
   const [autoRotate, setAutoRotate] = useState(false);
   const [vizOffsetX, setVizOffsetX] = useState(50); 
   const [vizOffsetY, setVizOffsetY] = useState(95); 
-  const [vizMirror, setVizMirror] = useState('none');
+  const [mirrorX, setMirrorX] = useState(false);
+  const [mirrorY, setMirrorY] = useState(false);
   const [vizThickness, setVizThickness] = useState(2);
   const [vizOpacity, setVizOpacity] = useState(1.0);
 
@@ -279,26 +270,16 @@ function App() {
   };
 
   const getVizDefaults = (type: string) => {
-    // 1. Defaults: Center, Scale 1.0, No Rotate
     const def = { x: 50, y: 50, rot: 0, scale: 1.0, auto: false };
-
-    // 2. Bottom Oriented
     const bottomTypes = [
       'spectrum', 'bars_3d', 'matrix', 'ribbon', 'bar_rain', 'spectrum_wave', 
       'cyber_city', 'mountain_view', 'pixel_blocks', 'aurora', 'deep_sea', 
       'abstract_clouds', 'led_wall', 'segmented_bar', 'seismic', 'fire'
     ];
     if (bottomTypes.includes(type)) def.y = 95;
-
-    // 3. Specific Tweaks
     if (['starfield', 'neon_grid', 'star_burst', 'solar_flare'].includes(type)) def.scale = 1.5;
     if (['particles', 'plasma', 'floating_orbs', 'gravity_well', 'techno_wires', 'neural_net', 'vector_field', 'swarm'].includes(type)) def.scale = 1.2;
-    
     if (['fractal_tree', 'mountain_view', 'abstract_clouds'].includes(type)) def.y = 85; 
-    
-    // Waveforms often look good centered but slightly wider
-    if (['wave', 'dual_wave', 'lightning', 'liquid_flow', 'digital_rain'].includes(type)) { def.y = 50; }
-
     return def;
   };
 
@@ -309,136 +290,222 @@ function App() {
     setVizOffsetY(defaults.y);
     setVizRotation(defaults.rot);
     setVizScale(defaults.scale);
-    setAutoRotate(false); // Disable auto-rotate when manually choosing
+    setAutoRotate(false);
   };
 
   const handleRandomize = () => {
     const randomColor = () => '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
     setFontFamily(FONT_OPTIONS[Math.floor(Math.random() * FONT_OPTIONS.length)].value);
-    setFontSizeScale(0.7 + Math.random() * 0.8);
-    setTextPosition(PRESET_POSITIONS[Math.floor(Math.random() * PRESET_POSITIONS.length)].value);
     setTextColor(randomColor());
+    setTextColorEnd(randomColor());
+    setUseTextGradient(Math.random() > 0.5);
+    setTextGradientMotion(Math.random() > 0.7);
     setTextGlow(Math.random() > 0.7);
     setTextReact(['pulse', 'jitter', 'bounce', 'flash', 'glow', 'none'][Math.floor(Math.random() * 6)]);
-    
     const randomType = VIZ_OPTIONS[Math.floor(Math.random() * VIZ_OPTIONS.length)].value;
     const defaults = getVizDefaults(randomType);
-    
     setVizType(randomType);
     setBarColor(randomColor());
     setBarColorEnd(randomColor());
     setUseGradient(Math.random() > 0.5);
-    setVizThickness(1 + Math.random() * 8);
-    setVizOpacity(0.5 + Math.random() * 0.5);
-    
+    setVizGradientMotion(Math.random() > 0.7);
+    setVizThickness(1 + Math.random() * 6);
+    setVizOpacity(0.6 + Math.random() * 0.4);
     setVizOffsetX(defaults.x);
     setVizOffsetY(defaults.y);
     setVizRotation(defaults.rot);
     setVizScale(defaults.scale);
-    setAutoRotate(false); // Disable auto-rotate on randomization
-
-    setLowCut(Math.floor(Math.random() * 20));
-    setHighCut(80 + Math.floor(Math.random() * 20));
-    setSmartCut(Math.random() > 0.5);
+    setAutoRotate(defaults.auto);
+    setMirrorX(false);
+    setMirrorY(false);
+    setTextPosition('center');
+    setTextMargin(5);
+    setFontSizeScale(1.0);
     setVignette(Math.random() > 0.5);
-    
-    setBgZoom(1.0 + (Math.random() > 0.7 ? Math.random() * 0.5 : 0));
+    setGlitchIntensity(Math.random() > 0.9 ? 0.1 : 0);
+    setShakeIntensity(Math.random() > 0.9 ? 0.1 : 0);
+    setRgbShiftIntensity(Math.random() > 0.9 ? 0.1 : 0);
+    setBgZoom(1.0);
+    setBgRotation(0);
   };
 
   useEffect(() => {
     if (bgFile) {
       const url = URL.createObjectURL(bgFile);
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setBgUrl(url);
       setBgType(bgFile.type.startsWith('video') ? 'video' : 'image');
-      if (audioFile) handleRandomize();
       return () => URL.revokeObjectURL(url);
     }
     setBgUrl(null); setBgType('none');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bgFile]);
 
-  useEffect(() => {
-    if (audioFile && bgFile) handleRandomize();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [audioFile]);
+  const [lowResourceExport, setLowResourceExport] = useState(false);
+  const [safeRender, setSafeRender] = useState(false);
 
   const handleStartRecording = async () => {
     if (!audioFile || !audioElement || !canvasRef.current || !audioContext || !sourceNode) return;
     setRendering(true);
     try {
-      // Ensure audio is at start
       audioElement.pause();
       audioElement.currentTime = 0;
-
+      
       const dest = audioContext.createMediaStreamDestination();
       sourceNode.connect(dest);
       
-      // Capture at a fixed 30fps for the recorder
-      const canvasStream = canvasRef.current.captureStream(30); 
+      // If safeRender is on, we force a more compatible profile
+      const types = (lowResourceExport || safeRender)
+        ? ['video/webm;codecs=vp8,opus', 'video/webm']
+        : ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm', 'video/mp4'];
+        
+      const mimeType = types.find(t => MediaRecorder.isTypeSupported(t)) || '';
       
-      const recorder = new MediaRecorder(new MediaStream([...canvasStream.getVideoTracks(), ...dest.stream.getAudioTracks()]), { 
-        mimeType: 'video/webm;codecs=vp9',
-        videoBitsPerSecond: 8000000 // Increased to 8Mbps
+      // Use natural capture stream without forced FPS for better hardware sync
+      const canvasStream = canvasRef.current.captureStream(); 
+      
+      const recorder = new MediaRecorder(new MediaStream([
+        ...canvasStream.getVideoTracks(), 
+        ...dest.stream.getAudioTracks()
+      ]), { 
+        mimeType: mimeType || 'video/webm',
+        videoBitsPerSecond: safeRender ? 2000000 : (lowResourceExport ? 4000000 : 8000000)
       });
-
+      
       const chunks: Blob[] = [];
-      recorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
+      recorder.ondataavailable = (e) => { 
+        if (e.data && e.data.size > 0) chunks.push(e.data);
+      };
+
+      recorder.onerror = (e) => {
+        console.error("MediaRecorder error:", e);
+        handleHardReset();
+      };
       
       recorder.onstop = () => {
-        const blob = new Blob(chunks, { type: 'video/webm' });
+        if (chunks.length === 0) {
+          setRendering(false);
+          restoreAudioAfterRecording();
+          return;
+        }
+        const blob = new Blob(chunks, { type: mimeType || 'video/webm' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a'); 
         a.href = url; 
         a.download = `muzyv_${audioFile.name.replace(/\.[^/.]+$/, "")}.webm`; 
         a.click();
         
-        // Full cleanup and reset
         sourceNode.disconnect(dest);
-        stop(); // Reset audio state
+        stop();
         setRendering(false); 
         restoreAudioAfterRecording();
-        
-        // Reset file inputs so they can be reused for the same filename
-        if (audioInputRef.current) audioInputRef.current.value = '';
-        if (bgInputRef.current) bgInputRef.current.value = '';
       };
 
-      // Start recording before playing to catch the first frame
       resetAudioForRecording(); 
-      recorder.start();
       
-      if (audioContext.state === 'suspended') await audioContext.resume();
+      if (audioContext.state === 'suspended') {
+        await audioContext.resume();
+      }
+
+      // Start recorder without timeslice for maximum stability
+      recorder.start(); 
       
-      // Give it a tiny moment to spin up the recorder
+      // Ensure audio is primed and ready
+      audioElement.load();
       setTimeout(async () => {
-        await audioElement.play();
-        
-        const onEnded = () => {
-          audioElement.removeEventListener('ended', onEnded);
-          if (recorder.state === 'recording') {
-            // Give a tiny buffer at the end to ensure the last frames are flushed
-            setTimeout(() => recorder.stop(), 500);
-          }
-        };
-        audioElement.addEventListener('ended', onEnded);
-      }, 100);
+        try {
+          await audioElement.play();
+          const onEnded = () => {
+            audioElement.removeEventListener('ended', onEnded);
+            if (recorder.state === 'recording') {
+              setTimeout(() => recorder.stop(), 1000); 
+            }
+          };
+          audioElement.addEventListener('ended', onEnded);
+        } catch (playErr) {
+          console.error("Playback failed during recording:", playErr);
+          recorder.stop();
+        }
+      }, 500);
 
     } catch (e: unknown) { 
-      console.error(e); 
+      console.error("Recording error:", e); 
       setRendering(false); 
       restoreAudioAfterRecording();
     }
+  };
+
+  const handleReset = () => {
+    setVizType('spectrum');
+    setBarColor('#ffffff');
+    setBarColorEnd('#8b5cf6');
+    setUseGradient(false);
+    setVizGradientMotion(false);
+    setTextColor('#ffffff');
+    setTextColorEnd('#8b5cf6');
+    setUseTextGradient(false);
+    setTextGradientMotion(false);
+    setVizScale(1.0);
+    setVizRotation(0);
+    setAutoRotate(false);
+    setVizOffsetX(50);
+    setVizOffsetY(95);
+    setMirrorX(false);
+    setMirrorY(false);
+    setVizThickness(2);
+    setVizOpacity(1.0);
+    setSensitivity(1.0);
+    setSmartSensitivity(true);
+    setLowCut(0);
+    setHighCut(100);
+    setSmartCut(true);
+    setGlitchIntensity(0);
+    setShakeIntensity(0);
+    setRgbShiftIntensity(0);
+    setPixelate(false);
+    setVignette(false);
+    setKaleidoscope(false);
+    setScanlines(false);
+    setNoise(false);
+    setInvert(false);
+    setFontFamily('Inter');
+    setFontSizeScale(1.0);
+    setTextPosition('center');
+    setTextMargin(5);
+    setTextGlow(false);
+    setTextOutline(false);
+    setTextReact('pulse');
+    setTextSensitivity(1.0);
+    setFadeInType('none');
+    setFadeOutType('none');
+    setBgZoom(1.0);
+    setBgRotation(0);
+  };
+
+  const handleHardReset = () => {
+    stop();
+    setAudioFile(null);
+    setBgFile(null);
+    setBgUrl(null);
+    setBgType('none');
+    setTitle('Unknown Track');
+    setArtist('Never Ending Loop');
+    setRendering(false);
+    setIsProcessing(false);
+    handleReset(); // Call existing reset for all other states
+    if (audioInputRef.current) audioInputRef.current.value = '';
+    if (bgInputRef.current) bgInputRef.current.value = '';
+    window.location.reload(); // Force a clean reload
   };
 
   return (
     <div className="app-container">
       <aside className="sidebar">
         <div className="logo">
-          <div className="logo-text">
+          <div className="logo-text" onClick={handleReset} style={{ cursor: 'pointer' }} title="Click to Reset Defaults">
             <Music size={24} stroke="currentColor" />
             <h1>Muzyv</h1>
+            <RefreshCw size={14} style={{ marginLeft: 4, opacity: 0.5 }} />
           </div>
+          <button className="btn-secondary" onClick={handleHardReset} style={{ fontSize: '0.6rem', padding: '4px 8px', marginTop: '4px' }}>Hard Reset App</button>
           <div className="header-controls">
             <button className="btn-icon" onClick={togglePlay} disabled={!audioFile} title="Play/Pause">
               {isPlaying ? <Pause className="lucide-icon" size={20} stroke="white" strokeWidth={2.5} /> : <Play className="lucide-icon" size={20} stroke="white" strokeWidth={2.5} />}
@@ -460,16 +527,7 @@ function App() {
             <span>{formatTime(currentTime)}</span>
             <span>{formatTime(duration)}</span>
           </div>
-          <input 
-            type="range" 
-            className="progress-slider"
-            min="0" 
-            max={duration || 0} 
-            step="0.1"
-            value={currentTime} 
-            onChange={(e) => seek(parseFloat(e.target.value))}
-            disabled={!audioFile}
-          />
+          <input type="range" className="progress-slider" min="0" max={duration || 0} step="0.1" value={currentTime} onChange={(e) => seek(parseFloat(e.target.value))} disabled={!audioFile} />
         </div>
 
         <div className="sidebar-tabs">
@@ -488,7 +546,11 @@ function App() {
                 <div className="upload-box" onClick={() => audioInputRef.current?.click()}>
                   <input type="file" accept="audio/*" hidden ref={audioInputRef} onChange={(e) => {
                     const file = e.target.files?.[0];
-                    if (file) { setAudioFile(file); setTitle(file.name.replace(/\.[^/.]+$/, "")); }
+                    if (file) { 
+                      setAudioFile(file); 
+                      setTitle(file.name.replace(/\.[^/.]+$/, "")); 
+                      handleRandomize();
+                    }
                   }} />
                   <Music size={24} className="text-accent" />
                   <div className="upload-label"><span>{audioFile ? 'Change' : 'Audio'}</span></div>
@@ -499,7 +561,6 @@ function App() {
                   <div className="upload-label"><span>{bgFile ? 'Change' : 'BG'}</span></div>
                 </div>
               </div>
-
               <div style={{ marginTop: '1.5rem' }}>
                 <h3><Maximize size={14} style={{marginRight: 8}}/> Background Control</h3>
                 <div className="flex-col" style={{ gap: '1rem' }}>
@@ -523,7 +584,6 @@ function App() {
                   </div>
                 </div>
               </div>
-
               {bgType === 'video' && (
                 <div style={{ marginTop: '1.5rem' }}>
                   <div className="label-row">
@@ -574,9 +634,12 @@ function App() {
                 <h3>Appearance</h3>
                 <div className="row-2-col">
                    <div><label>Start</label><div className="color-picker-wrapper"><input type="color" value={barColor} onChange={(e) => setBarColor(e.target.value)} /></div></div>
-                   {useGradient && <div><label>End</label><div className="color-picker-wrapper"><input type="color" value={barColorEnd} onChange={(e) => setBarColorEnd(e.target.value)} /></div></div>}
+                   {(useGradient || vizGradientMotion) && <div><label>End</label><div className="color-picker-wrapper"><input type="color" value={barColorEnd} onChange={(e) => setBarColorEnd(e.target.value)} /></div></div>}
                 </div>
-                <label className="label-row" style={{ marginTop: '0.5rem' }}><span>Gradient</span><input type="checkbox" checked={useGradient} onChange={(e) => setUseGradient(e.target.checked)} /></label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginTop: '0.5rem' }}>
+                  <label className="label-row"><span>Gradient</span><input type="checkbox" checked={useGradient} onChange={(e) => setUseGradient(e.target.checked)} /></label>
+                  <label className="label-row"><span>Motion</span><input type="checkbox" checked={vizGradientMotion} onChange={(e) => setVizGradientMotion(e.target.checked)} /></label>
+                </div>
                 <div className="row-2-col" style={{ marginTop: '1rem' }}>
                    <div className="flex-col">
                      <label className="label-row"><span>Weight</span> <span className="value">{vizThickness}px</span></label>
@@ -616,9 +679,10 @@ function App() {
                   </div>
                   <div className="flex-col">
                     <label>Mirror</label>
-                    <select value={vizMirror} onChange={(e) => setVizMirror(e.target.value)}>
-                      <option value="none">None</option><option value="x">Flip X</option><option value="y">Flip Y</option><option value="xy">Both</option>
-                    </select>
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', height: '100%' }}>
+                      <label style={{ margin: 0, gap: 4 }}>X <input type="checkbox" checked={mirrorX} onChange={(e) => setMirrorX(e.target.checked)} /></label>
+                      <label style={{ margin: 0, gap: 4 }}>Y <input type="checkbox" checked={mirrorY} onChange={(e) => setMirrorY(e.target.checked)} /></label>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -665,7 +729,12 @@ function App() {
                    </div>
                  </div>
                  <div className="row-2-col" style={{ marginTop: '1rem' }}>
-                   <div><label>Color</label><div className="color-picker-wrapper"><input type="color" value={textColor} onChange={(e) => setTextColor(e.target.value)} /></div></div>
+                   <div><label>Start Color</label><div className="color-picker-wrapper"><input type="color" value={textColor} onChange={(e) => setTextColor(e.target.value)} /></div></div>
+                   {(useTextGradient || textGradientMotion) && <div><label>End Color</label><div className="color-picker-wrapper"><input type="color" value={textColorEnd} onChange={(e) => setTextColorEnd(e.target.value)} /></div></div>}
+                 </div>
+                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginTop: '0.5rem' }}>
+                   <label className="label-row"><span>Gradient</span><input type="checkbox" checked={useTextGradient} onChange={(e) => setUseTextGradient(e.target.checked)} /></label>
+                   <label className="label-row"><span>Motion</span><input type="checkbox" checked={textGradientMotion} onChange={(e) => setTextGradientMotion(e.target.checked)} /></label>
                  </div>
                  <div style={{ marginTop: '1rem' }}>
                     <label>Reactive Mode</label>
@@ -740,6 +809,21 @@ function App() {
                 </select>
               </div>
               <div className="flex-col" style={{ gap: '1.5rem' }}>
+                <div className="label-row">
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-accent)' }}>
+                    <Zap size={14} /> Low Resource Mode
+                  </label>
+                  <input type="checkbox" checked={lowResourceExport} onChange={(e) => setLowResourceExport(e.target.checked)} />
+                </div>
+                
+                <div className="label-row" style={{ marginTop: '0.5rem' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#f87171' }}>
+                    <Shield size={14} /> Safe Render (Ultra Stable)
+                  </label>
+                  <input type="checkbox" checked={safeRender} onChange={(e) => setSafeRender(e.target.checked)} />
+                </div>
+                <span className="helper-text" style={{ marginTop: '-0.5rem' }}>Bypasses heavy effects and reduces bitrate to prevent terminal/tensor crashes.</span>
+
                 <div className="flex-col">
                   <div className="label-row">
                     <label>Fade In</label>
@@ -771,18 +855,21 @@ function App() {
         <div className="canvas-wrapper">
           <Visualizer ref={canvasRef} analyser={analyser} bgUrl={bgUrl} bgType={bgType} vizType={vizType}
             bgZoom={bgZoom} bgOffsetX={bgOffsetX} bgOffsetY={bgOffsetY} bgRotation={bgRotation}
-            barColor={barColor} barColorEnd={barColorEnd} useGradient={useGradient} textColor={textColor}
+            barColor={barColor} barColorEnd={barColorEnd} useGradient={useGradient} 
+            vizGradientMotion={vizGradientMotion}
+            textColor={textColor} textColorEnd={textColorEnd} useTextGradient={useTextGradient}
+            textGradientMotion={textGradientMotion}
             title={title} artist={artist} resolution={resolution} textPosition={textPosition}
             fontFamily={fontFamily} fontSizeScale={fontSizeScale} sensitivity={sensitivity}
             smartSensitivity={smartSensitivity} vizScale={vizScale} vizRotation={vizRotation} autoRotate={autoRotate}
-            vizOffsetX={vizOffsetX} vizOffsetY={vizOffsetY} vizMirror={vizMirror} vizThickness={vizThickness} vizOpacity={vizOpacity}
+            vizOffsetX={vizOffsetX} vizOffsetY={vizOffsetY} mirrorX={mirrorX} mirrorY={mirrorY} vizThickness={vizThickness} vizOpacity={vizOpacity}
             lowCut={lowCut} highCut={highCut} smartCut={smartCut}
             glitchIntensity={glitchIntensity} shakeIntensity={shakeIntensity} rgbShiftIntensity={rgbShiftIntensity}
             pixelate={pixelate} vignette={vignette} kaleidoscope={kaleidoscope} scanlines={scanlines}
             noise={noise} invert={invert}
             textGlow={textGlow} textOutline={textOutline} textReact={textReact} textSensitivity={textSensitivity}
             textMargin={textMargin}
-            yoyoMode={yoyoMode} isPlaying={isPlaying} onProcessingChange={setIsProcessing}
+            yoyoMode={yoyoMode} isPlaying={isPlaying} rendering={rendering} safeRender={safeRender} onProcessingChange={setIsProcessing}
             fadeInType={fadeInType} fadeInDuration={fadeInDuration} fadeOutType={fadeOutType} fadeOutDuration={fadeOutDuration}
             audioElement={audioElement} />
         </div>

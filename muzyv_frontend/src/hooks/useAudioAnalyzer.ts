@@ -47,6 +47,8 @@ export const useAudioAnalyzer = (audioFile: File | null) => {
 
       const audio = new Audio(URL.createObjectURL(audioFile));
       audio.loop = true;
+      audio.setAttribute('playsinline', 'true');
+      audio.setAttribute('webkit-playsinline', 'true');
       audioRef.current = audio;
 
       audio.onloadedmetadata = () => {
