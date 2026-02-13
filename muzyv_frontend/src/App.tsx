@@ -192,6 +192,10 @@ function App() {
   const [bgOffsetX, setBgOffsetX] = useState(50);
   const [bgOffsetY, setBgOffsetY] = useState(50);
   const [bgRotation, setBgRotation] = useState(0);
+  const [bgSpeed, setBgSpeed] = useState(1.0);
+  const [bgBeatResponse, setBgBeatResponse] = useState(0.8);
+  const [bgLoopMode, setBgLoopMode] = useState('cut');
+  const [bgLoopDuration, setBgLoopDuration] = useState(1.0);
 
   const [defaultArtist, setDefaultArtist] = useState('Never Ending Loop');
   const [title, setTitle] = useState('Unknown Track');
@@ -238,6 +242,8 @@ function App() {
   const [fontFamily, setFontFamily] = useState('Inter');
   const [fontSizeScale, setFontSizeScale] = useState(1.0);
   const [textPosition, setTextPosition] = useState('center');
+  const [textOffsetX, setTextOffsetX] = useState(0);
+  const [textOffsetY, setTextOffsetY] = useState(0);
   const [textMargin, setTextMargin] = useState(5);
   const [textGlow, setTextGlow] = useState(false);
   const [textOutline, setTextOutline] = useState(false);
@@ -316,11 +322,12 @@ function App() {
     setVizRotation(defaults.rot);
     setVizScale(defaults.scale);
     setAutoRotate(defaults.auto);
-    setMirrorX(false);
-    setMirrorY(false);
-    setTextPosition('center');
-    setTextMargin(5);
-    setFontSizeScale(1.0);
+    setMirrorX(Math.random() > 0.8);
+    setMirrorY(Math.random() > 0.9);
+    const randomPos = PRESET_POSITIONS[Math.floor(Math.random() * PRESET_POSITIONS.length)].value;
+    setTextPosition(randomPos);
+    setFontSizeScale(0.8 + Math.random() * 0.5);
+    setTextSensitivity(0.5 + Math.random() * 1.5);
     setVignette(Math.random() > 0.5);
     setGlitchIntensity(Math.random() > 0.9 ? 0.1 : 0);
     setShakeIntensity(Math.random() > 0.9 ? 0.1 : 0);
@@ -469,6 +476,8 @@ function App() {
     setFontFamily('Inter');
     setFontSizeScale(1.0);
     setTextPosition('center');
+    setTextOffsetX(0);
+    setTextOffsetY(0);
     setTextMargin(5);
     setTextGlow(false);
     setTextOutline(false);
@@ -478,6 +487,8 @@ function App() {
     setFadeOutType('none');
     setBgZoom(1.0);
     setBgRotation(0);
+    setBgSpeed(1.0);
+    setBgBeatResponse(0.8);
   };
 
   const handleHardReset = () => {
@@ -582,6 +593,38 @@ function App() {
                     <label className="label-row"><span>BG Rotation</span> <span className="value">{bgRotation}°</span></label>
                     <input type="range" min="0" max="360" value={bgRotation} onChange={(e) => setBgRotation(parseInt(e.target.value))} />
                   </div>
+                  {(bgType === 'video') && (
+                    <>
+                      <div className="flex-col">
+                        <label className="label-row"><span>BG Speed</span> <span className="value">{bgSpeed.toFixed(2)}x</span></label>
+                        <input type="range" min="0.1" max="4.0" step="0.05" value={bgSpeed} onChange={(e) => setBgSpeed(parseFloat(e.target.value))} />
+                      </div>
+                      <div className="flex-col">
+                        <label className="label-row"><span>Beat Response</span> <span className="value">{Math.round(bgBeatResponse * 100)}%</span></label>
+                        <input type="range" min="0" max="1" step="0.01" value={bgBeatResponse} onChange={(e) => setBgBeatResponse(parseFloat(e.target.value))} />
+                      </div>
+                      <div className="flex-col">
+                        <label className="label-row"><span>Loop Transition</span></label>
+                        <select value={bgLoopMode} onChange={(e) => setBgLoopMode(e.target.value)}>
+                          <option value="cut">Hard Cut</option>
+                          <option value="fade">Cross-Fade (Dip)</option>
+                          <option value="blur">Blur Seam</option>
+                          <option value="zoom">Zoom Loop</option>
+                          <option value="slide">Slide Transition</option>
+                          <option value="ghost">Ghost Overlay</option>
+                          <option value="glitch">Glitch Cut</option>
+                          <option value="wash_black">Wash to Black</option>
+                          <option value="wash_white">Wash to White</option>
+                        </select>
+                      </div>
+                      {bgLoopMode !== 'cut' && (
+                        <div className="flex-col">
+                          <label className="label-row"><span>Transition Duration</span> <span className="value">{bgLoopDuration.toFixed(1)}s</span></label>
+                          <input type="range" min="0.1" max="5.0" step="0.1" value={bgLoopDuration} onChange={(e) => setBgLoopDuration(parseFloat(e.target.value))} />
+                        </div>
+                      )}
+                    </>
+                  )}
                 </div>
               </div>
               {bgType === 'video' && (
@@ -736,6 +779,16 @@ function App() {
                    <label className="label-row"><span>Gradient</span><input type="checkbox" checked={useTextGradient} onChange={(e) => setUseTextGradient(e.target.checked)} /></label>
                    <label className="label-row"><span>Motion</span><input type="checkbox" checked={textGradientMotion} onChange={(e) => setTextGradientMotion(e.target.checked)} /></label>
                  </div>
+                 <div className="row-2-col" style={{ marginTop: '1rem' }}>
+                   <div>
+                     <label>Offset X <span className="value">{textOffsetX}%</span></label>
+                     <input type="range" min="-50" max="50" value={textOffsetX} onChange={(e) => setTextOffsetX(parseInt(e.target.value))} />
+                   </div>
+                   <div>
+                     <label>Offset Y <span className="value">{textOffsetY}%</span></label>
+                     <input type="range" min="-50" max="50" value={textOffsetY} onChange={(e) => setTextOffsetY(parseInt(e.target.value))} />
+                   </div>
+                 </div>
                  <div style={{ marginTop: '1rem' }}>
                     <label>Reactive Mode</label>
                     <select value={textReact} onChange={(e) => setTextReact(e.target.value)}>
@@ -853,13 +906,14 @@ function App() {
 
       <main className="main-preview">
         <div className="canvas-wrapper">
-          <Visualizer ref={canvasRef} analyser={analyser} bgUrl={bgUrl} bgType={bgType} vizType={vizType}
-            bgZoom={bgZoom} bgOffsetX={bgOffsetX} bgOffsetY={bgOffsetY} bgRotation={bgRotation}
-            barColor={barColor} barColorEnd={barColorEnd} useGradient={useGradient} 
-            vizGradientMotion={vizGradientMotion}
+                    <Visualizer ref={canvasRef} analyser={analyser} bgUrl={bgUrl} bgType={bgType} vizType={vizType}
+                      bgZoom={bgZoom} bgOffsetX={bgOffsetX} bgOffsetY={bgOffsetY} bgRotation={bgRotation}
+                      bgSpeed={bgSpeed} bgBeatResponse={bgBeatResponse} bgLoopMode={bgLoopMode} bgLoopDuration={bgLoopDuration}
+                      barColor={barColor} barColorEnd={barColorEnd} useGradient={useGradient} vizGradientMotion={vizGradientMotion}
             textColor={textColor} textColorEnd={textColorEnd} useTextGradient={useTextGradient}
             textGradientMotion={textGradientMotion}
             title={title} artist={artist} resolution={resolution} textPosition={textPosition}
+            textOffsetX={textOffsetX} textOffsetY={textOffsetY}
             fontFamily={fontFamily} fontSizeScale={fontSizeScale} sensitivity={sensitivity}
             smartSensitivity={smartSensitivity} vizScale={vizScale} vizRotation={vizRotation} autoRotate={autoRotate}
             vizOffsetX={vizOffsetX} vizOffsetY={vizOffsetY} mirrorX={mirrorX} mirrorY={mirrorY} vizThickness={vizThickness} vizOpacity={vizOpacity}
