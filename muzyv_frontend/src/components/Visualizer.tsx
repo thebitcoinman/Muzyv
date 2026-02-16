@@ -95,6 +95,7 @@ export const Visualizer = forwardRef<HTMLCanvasElement, VisualizerProps>((props,
   const captureFpsRef = useRef<number>(30);
   
   const pixelCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const renderFrameRef = useRef<(() => void) | null>(null);
 
   const [w, h] = resolution.split('x').map(Number);
 
@@ -107,7 +108,7 @@ export const Visualizer = forwardRef<HTMLCanvasElement, VisualizerProps>((props,
         let interval;
         onmessage = (e) => {
           if (e.data === 'start') {
-            interval = setInterval(() => postMessage('tick'), 16);
+            interval = setInterval(() => postMessage('tick'), 10);
           } else if (e.data === 'stop') {
             clearInterval(interval);
           }
@@ -118,8 +119,12 @@ export const Visualizer = forwardRef<HTMLCanvasElement, VisualizerProps>((props,
       workerRef.current = worker;
       
       worker.onmessage = () => {
-        if (propsRef.current.rendering && animationRef.current === undefined) {
-          // Worker tick acts as a fallback if requestAnimationFrame is throttled
+        if (propsRef.current.rendering) {
+          // If we are rendering, we use the worker tick to drive the frames
+          // because requestAnimationFrame will be throttled in the background
+          if (renderFrameRef.current) {
+            renderFrameRef.current();
+          }
         }
       };
       
@@ -277,8 +282,8 @@ export const Visualizer = forwardRef<HTMLCanvasElement, VisualizerProps>((props,
       
       if (p.rendering) {
         const frameInterval = 1000 / (p.safeRender ? 24 : 30);
-        if (now - lastExportFrameTimeRef.current < frameInterval - 1) { 
-          animationRef.current = requestAnimationFrame(render); return; 
+        if (now - lastExportFrameTimeRef.current < frameInterval - 5) { 
+          return; 
         }
         lastExportFrameTimeRef.current = now;
       }
@@ -328,7 +333,6 @@ export const Visualizer = forwardRef<HTMLCanvasElement, VisualizerProps>((props,
 
       const effectiveBgSpeed = (p.bgSpeed ?? 1.0) + (isNaN(avgVol) ? 0 : avgVol) * (p.bgBeatResponse ?? 0.8) * 3;
       if (p.isPlaying || p.rendering) bgTimeRef.current += (isNaN(delta) ? 0 : delta) * effectiveBgSpeed;
-      const bgTimeValue = bgTimeRef.current;
 
       try {
         ctx.fillStyle = '#000'; ctx.fillRect(0, 0, width, height);
@@ -587,16 +591,40 @@ export const Visualizer = forwardRef<HTMLCanvasElement, VisualizerProps>((props,
 
         // --- Typography ---
         ctx.save();
-        const rV = (isNaN(avgVol) ? 0 : avgVol) * (p.textSensitivity ?? 1.0); let bS = 1.0;
+        const rV = (isNaN(avgVol) ? 0 : avgVol) * (p.textSensitivity ?? 1.0); 
+        let bS = 1.0;
+        let tOX = 0;
+        let tOY = 0;
+        let tAlpha = 1.0;
+        let rGlow = 0;
+
         if (p.textReact === 'pulse') bS = 1.0 + (rV * 0.5);
+        if (p.textReact === 'bounce') tOY = -rV * 100 * responsiveScale;
+        if (p.textReact === 'jitter') {
+          tOX = (Math.random() - 0.5) * rV * 50 * responsiveScale;
+          tOY = (Math.random() - 0.5) * rV * 50 * responsiveScale;
+        }
+        if (p.textReact === 'flash') tAlpha = Math.max(0.2, 1.0 - (rV * 0.8));
+        if (p.textReact === 'glow') rGlow = rV * 100 * responsiveScale;
+
+        ctx.globalAlpha = tAlpha;
+
         const margin = ((p.textMargin ?? 5) / 100) * width;
         const baseSize = 80 * responsiveScale * (p.fontSizeScale ?? 1.0) * bS;
         ctx.font = `bold ${Math.floor(baseSize)}px "${p.fontFamily}", sans-serif`;
-        ctx.fillStyle = p.textColor; 
         
-        if (p.textGlow) {
-          ctx.shadowColor = p.textColor;
-          ctx.shadowBlur = 15 * responsiveScale;
+        // Reactive Brightness for Glow mode
+        let finalTextColor = p.textColor;
+        if (p.textReact === 'glow' && rV > 0.1) {
+          const rgb = hexToRgb(p.textColor);
+          const boost = Math.floor(rV * 100);
+          finalTextColor = `rgb(${Math.min(255, rgb.r + boost)}, ${Math.min(255, rgb.g + boost)}, ${Math.min(255, rgb.b + boost)})`;
+        }
+        ctx.fillStyle = finalTextColor; 
+        
+        if (p.textGlow || p.textReact === 'glow') {
+          ctx.shadowColor = p.textReact === 'glow' ? finalTextColor : p.textColor;
+          ctx.shadowBlur = (p.textGlow ? 15 * responsiveScale : 0) + rGlow;
         }
 
         let tx = width / 2, ty = height / 2;
@@ -608,8 +636,8 @@ export const Visualizer = forwardRef<HTMLCanvasElement, VisualizerProps>((props,
         if (p.textPosition.includes('left')) { tx = margin; align = 'left'; }
         else if (p.textPosition.includes('right')) { tx = width - margin; align = 'right'; }
         
-        tx += (p.textOffsetX ?? 0) * (width / 100);
-        ty += (p.textOffsetY ?? 0) * (height / 100);
+        tx += (p.textOffsetX ?? 0) * (width / 100) + tOX;
+        ty += (p.textOffsetY ?? 0) * (height / 100) + tOY;
 
         ctx.textAlign = align;
         
@@ -695,8 +723,11 @@ export const Visualizer = forwardRef<HTMLCanvasElement, VisualizerProps>((props,
       } catch (err) { console.error(err); }
       
       const nextFrame = () => { if (animationRef.current !== undefined) animationRef.current = requestAnimationFrame(render); };
-      if (p.rendering) setTimeout(nextFrame, 16); else nextFrame();
+      if (!p.rendering) {
+        nextFrame();
+      }
     };
+    renderFrameRef.current = render;
     animationRef.current = requestAnimationFrame(render);
     return () => { if (animationRef.current !== undefined) { cancelAnimationFrame(animationRef.current); animationRef.current = undefined; } };
   }, [analyser, bgType, resolution, w, h]);
