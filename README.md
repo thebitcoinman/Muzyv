@@ -41,37 +41,43 @@ Muzyv is a **high-performance, client-side audio visualization application** tha
 
 ## 🚀 Quick Start
 
-### One-Click Docker Deployment (Recommended)
+Muzyv is a fully client-side application. You can run it easily using either **Docker** or **NPM**.
 
+### Option 1: Docker (Containerized)
+Ideal for quick deployment without installing Node.js locally.
 ```bash
 git clone https://github.com/thebitcoinman/Muzyv.git
 cd Muzyv
 docker-compose up -d
 ```
+🎉 Access at `http://localhost:3000`
 
-🎉 **Open your browser and navigate to `http://localhost:3000`**
-
-### Manual Setup
-
-<details>
-<summary>📋 Click to expand manual setup instructions</summary>
-
-**Prerequisites:**
-- Node.js 18+ LTS
-- npm 8+
-
+### Option 2: NPM (Local Development)
+Ideal for developers or those who prefer running directly on their system.
 ```bash
 git clone https://github.com/thebitcoinman/Muzyv.git
 cd Muzyv/muzyv_frontend
 npm install
 npm run dev
 ```
-
-Then open `http://localhost:5173` in your browser.
-
-</details>
+🎉 Access at `http://localhost:5173`
 
 ---
+
+## 🛠 Setup & Installation
+
+### Docker Deployment
+The Docker setup uses Nginx to serve the optimized production build.
+- **Build & Run:** `docker-compose up --build -d`
+- **Stop:** `docker-compose down`
+
+### Local NPM Development
+Muzyv is built with Vite and React.
+1. **Navigate to project:** `cd muzyv_frontend`
+2. **Install dependencies:** `npm install`
+3. **Start development server:** `npm run dev`
+4. **Build for production:** `npm run build`
+   *The output will be in the `dist/` folder, which can be served by any static web server.*
 
 ## 🎨 Features
 
