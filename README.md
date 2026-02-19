@@ -43,7 +43,13 @@ Muzyv is a **high-performance, client-side audio visualization application** tha
 
 Muzyv is a fully client-side application. You can run it easily using either **Docker** or **NPM**.
 
-### Option 1: Docker (Containerized)
+### Option 1: Pinokio (Recommended)
+Ideal for users who want a simple, one-click installation and management experience.
+1. Download and install [Pinokio](https://pinokio.computer/)
+2. Open Pinokio and search for `Muzyv` or paste the URL: `https://github.com/thebitcoinman/muzyv-pinokio`
+[![Pinokio](https://img.shields.io/badge/Pinokio-Install-007ACC?style=for-the-badge&logo=pinokio&logoColor=white)](https://pinokio.computer/)
+
+### Option 2: Docker (Containerized)
 Ideal for quick deployment without installing Node.js locally.
 ```bash
 git clone https://github.com/thebitcoinman/Muzyv.git
@@ -52,7 +58,7 @@ docker-compose up -d
 ```
 🎉 Access at `http://localhost:3000`
 
-### Option 2: NPM (Local Development)
+### Option 3: NPM (Local Development)
 Ideal for developers or those who prefer running directly on their system.
 ```bash
 git clone https://github.com/thebitcoinman/Muzyv.git
