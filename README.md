@@ -46,8 +46,8 @@ Muzyv is a fully client-side application. You can run it easily using either **D
 ### Option 1: Pinokio (Recommended)
 Ideal for users who want a simple, one-click installation and management experience.
 1. Download and install [Pinokio](https://pinokio.computer/)
-2. **Open in Pinokio:** Click the button below to install:
-[![Pinokio Install](https://img.shields.io/badge/Pinokio-Install%20Muzyv-007ACC?style=for-the-badge&logo=pinokio&logoColor=white)](https://pinokio.computer/item?uri=https%3A%2F%2Fgithub.com%2Fthebitcoinman%2FMuzyv-pinokio)
+2. **One-Click Install:** Click the button below to install Muzyv directly:
+[![Install with Pinokio](https://github.com/pinokiocomputer/pinokio-badge/raw/main/badge.png)](pinokio://install?url=https://github.com/thebitcoinman/Muzyv-pinokio.git)
 
 *(Alternatively, paste `https://github.com/thebitcoinman/Muzyv-pinokio` into the Pinokio address bar)*
 
