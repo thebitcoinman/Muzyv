@@ -1,7 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
-import { Music, Image as ImageIcon, Play, Pause, Shuffle, Loader2, Square, Zap, Type, Film, Sliders, Maximize, Move, Volume2, VolumeX, RefreshCw, Shield } from 'lucide-react';
+import { Music, Image as ImageIcon, Play, Pause, Shuffle, Loader2, Square, Zap, Type, Film, Sliders, Maximize, Move, Volume2, VolumeX, RefreshCw, Shield, List } from 'lucide-react';
+import JSZip from 'jszip';
 import { useAudioAnalyzer } from './hooks/useAudioAnalyzer';
 import { Visualizer } from './components/Visualizer';
+import { AudioTrimWaveform } from './components/AudioTrimWaveform';
 import './App.css';
 
 const FONT_OPTIONS = [
@@ -142,7 +144,11 @@ const VIZ_OPTIONS = [
   { label: '36. Crystal', value: 'crystal' },
   { label: '37. Starfield', value: 'starfield' },
   { label: '38. Particles', value: 'particles' },
-  { label: '39. Shockwave', value: 'shockwave' },
+  { label: '39. Particle Mesh', value: 'particle_mesh' },
+  { label: '40. Fireflies', value: 'fireflies' },
+  { label: '41. Snowfall', value: 'snowfall' },
+  { label: '42. Confetti', value: 'confetti' },
+  { label: '43. Shockwave', value: 'shockwave' },
   { label: '40. Gravity Well', value: 'gravity_well' },
   { label: '41. Star Burst', value: 'star_burst' },
   { label: '42. Vortex', value: 'vortex' },
@@ -258,12 +264,48 @@ function App() {
   const [rendering, setRendering] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [vizCollapsed, setVizCollapsed] = useState(false);
+  
+  // Batch Mode States
+  const [batchQueue, setBatchQueue] = useState<File[]>([]);
+  const [isBatchMode, setIsBatchMode] = useState(false);
+  const [batchRandomize, setBatchRandomize] = useState(false);
+  const [currentBatchIndex, setCurrentBatchIndex] = useState(-1);
+  const [zipProgress, setZipStatus] = useState<string | null>(null);
+  const [batchDownloadMode, setBatchDownloadMode] = useState<'zip' | 'individual'>('zip');
+  
+  // High-performance non-reactive storage for batch results
+  const batchBlobsRef = useRef<{name: string, blob: Blob}[]>([]);
+  const [zoomMode, setZoomMode] = useState<'start' | 'end' | 'full'>('full');
+  const zoomTimerRef = useRef<number | null>(null);
+
+  const setTemporaryZoom = (mode: 'start' | 'end') => {
+    setZoomMode(mode);
+    if (zoomTimerRef.current) window.clearTimeout(zoomTimerRef.current);
+    zoomTimerRef.current = window.setTimeout(() => setZoomMode('full'), 3000);
+  };
 
   const { 
     togglePlay, toggleMute, stop, isPlaying, isMuted, audioElement, audioContext, sourceNode, analyser,
     currentTime, duration, seek,
-    resetAudioForRecording, restoreAudioAfterRecording
+    resetAudioForRecording,
+    startTime, endTime, setStartTime, setEndTime, audioBuffer,
+    audioFadeIn, setAudioFadeIn, audioFadeOut, setAudioFadeOut, fadeDuration, setFadeDuration,
+    setIsRendering, fadeGainNode, isReady
   } = useAudioAnalyzer(audioFile);
+
+  // Auto-revoke audio blobs to save RAM
+  useEffect(() => {
+    if (audioFile && isReady) {
+      // Small delay to ensure browser finished initial read
+      const t = setTimeout(() => {
+        if (audioElement?.src?.startsWith('blob:')) {
+          // We don't revoke here because useAudioAnalyzer needs it for seek/play
+          // but we will ensure it's revoked on UNMOUNT in the hook itself.
+        }
+      }, 1000);
+      return () => clearTimeout(t);
+    }
+  }, [audioFile, isReady]);
 
   const audioInputRef = useRef<HTMLInputElement>(null);
   const bgInputRef = useRef<HTMLInputElement>(null);
@@ -346,28 +388,106 @@ function App() {
     setBgUrl(null); setBgType('none');
   }, [bgFile]);
 
+  // Handle Batch final ZIP download
+  useEffect(() => {
+    // If batch mode was turned off but we have blobs, trigger the download
+    if (!isBatchMode && batchBlobsRef.current.length > 0 && batchQueue.length > 0) {
+      const finishBatch = async () => {
+        setZipStatus('Packaging ZIP...');
+        await downloadZip(batchBlobsRef.current);
+        batchBlobsRef.current = [];
+        setBatchQueue([]);
+        setCurrentBatchIndex(-1);
+        setZipStatus(null);
+      };
+      finishBatch();
+    }
+  }, [isBatchMode]);
+
+  // Handle Batch Auto-Start when audio ready
+  useEffect(() => {
+    if (isBatchMode && currentBatchIndex >= 0 && isReady && audioFile && audioElement) {
+      const timer = setTimeout(() => {
+        const newDuration = audioElement.duration;
+        
+        // Update states explicitly so the Visualizer component is aware of the new length
+        setStartTime(0);
+        setEndTime(newDuration);
+        
+        handleStartRecording(0, newDuration);
+      }, 3000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [currentBatchIndex, isBatchMode, isReady, !!audioFile, !!audioElement]);
+
   const [lowResourceExport, setLowResourceExport] = useState(false);
   const [safeRender, setSafeRender] = useState(false);
 
-  const handleStartRecording = async () => {
+  const handleStopBatch = () => {
+    if (!isBatchMode) return;
+    setIsBatchMode(false);
+    setZipStatus('Stopping and packaging current tracks...');
+    
+    // If we are currently rendering, the onstop handler will trigger the final ZIP
+    if (!rendering) {
+      if (batchBlobsRef.current.length > 0) {
+        downloadZip(batchBlobsRef.current).then(() => {
+          batchBlobsRef.current = [];
+          setBatchQueue([]);
+          setCurrentBatchIndex(-1);
+          setZipStatus(null);
+        });
+      } else {
+        setBatchQueue([]);
+        setCurrentBatchIndex(-1);
+        setZipStatus(null);
+      }
+    }
+  };
+
+  const downloadZip = async (blobs: {name: string, blob: Blob}[]) => {
+    const zip = new JSZip();
+    blobs.forEach(({ name, blob }) => {
+      zip.file(`${name}.webm`, blob);
+    });
+    // Use STORE compression to avoid massive RAM spikes during packaging
+    const content = await zip.generateAsync({ type: 'blob', compression: 'STORE' });
+    const url = URL.createObjectURL(content);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `muzyv_batch_${new Date().getTime()}.zip`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleStartRecording = async (overrideStart?: number, overrideEnd?: number) => {
     if (!audioFile || !audioElement || !canvasRef.current || !audioContext || !sourceNode) return;
+    
+    const finalStart = typeof overrideStart === 'number' ? overrideStart : startTime;
+    const finalEnd = typeof overrideEnd === 'number' ? overrideEnd : endTime;
+
     setRendering(true);
+    setIsRendering(true);
+    let canvasStream: MediaStream | null = null;
+
     try {
       audioElement.pause();
-      audioElement.currentTime = 0;
+      audioElement.currentTime = finalStart;
       
       const dest = audioContext.createMediaStreamDestination();
-      sourceNode.connect(dest);
+      if (fadeGainNode) {
+        fadeGainNode.connect(dest);
+      } else {
+        sourceNode.connect(dest);
+      }
       
-      // If safeRender is on, we force a more compatible profile
       const types = (lowResourceExport || safeRender)
         ? ['video/webm;codecs=vp8,opus', 'video/webm']
         : ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm', 'video/mp4'];
         
       const mimeType = types.find(t => MediaRecorder.isTypeSupported(t)) || '';
-      
-      // Use natural capture stream without forced FPS for better hardware sync
-      const canvasStream = canvasRef.current.captureStream(); 
+      canvasStream = canvasRef.current.captureStream(30); 
       
       const recorder = new MediaRecorder(new MediaStream([
         ...canvasStream.getVideoTracks(), 
@@ -387,48 +507,89 @@ function App() {
         handleHardReset();
       };
       
-      recorder.onstop = () => {
+      recorder.onstop = async () => {
+        setIsRendering(false);
+        
+        // Explicitly stop all tracks to free hardware resources
+        if (canvasStream) canvasStream.getTracks().forEach(track => track.stop());
+        dest.stream.getTracks().forEach(track => track.stop());
+
         if (chunks.length === 0) {
           setRendering(false);
-          restoreAudioAfterRecording();
           return;
         }
         const blob = new Blob(chunks, { type: mimeType || 'video/webm' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a'); 
-        a.href = url; 
-        a.download = `muzyv_${audioFile.name.replace(/\.[^/.]+$/, "")}.webm`; 
-        a.click();
+        chunks.length = 0; // Clear memory immediately
+        const fileName = audioFile.name.replace(/\.[^/.]+$/, "");
+
+        if (!isBatchMode || batchDownloadMode === 'individual') {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a'); 
+          a.href = url; 
+          a.download = `muzyv_${fileName}.webm`; 
+          a.click();
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+        } else {
+          batchBlobsRef.current.push({ name: fileName, blob });
+        }
         
-        sourceNode.disconnect(dest);
+        if (fadeGainNode) fadeGainNode.disconnect(dest);
+        else sourceNode.disconnect(dest);
+        
         stop();
         setRendering(false); 
-        restoreAudioAfterRecording();
+
+        if (isBatchMode) {
+          if (currentBatchIndex < batchQueue.length - 1) {
+            const nextIndex = currentBatchIndex + 1;
+            setCurrentBatchIndex(nextIndex);
+            const nextFile = batchQueue[nextIndex];
+            setAudioFile(nextFile);
+            setTitle(nextFile.name.replace(/\.[^/.]+$/, ""));
+            if (batchRandomize) handleRandomize();
+          } else {
+            setIsBatchMode(false);
+          }
+        }
       };
 
       resetAudioForRecording(); 
-      
-      if (audioContext.state === 'suspended') {
-        await audioContext.resume();
-      }
+      if (audioContext.state === 'suspended') await audioContext.resume();
 
-      // Start recorder without timeslice for maximum stability
       recorder.start(); 
       
-      // Ensure audio is primed and ready
-      audioElement.load();
       setTimeout(async () => {
         try {
+          audioElement.currentTime = finalStart;
           await audioElement.play();
-          const onEnded = () => {
-            audioElement.removeEventListener('ended', onEnded);
-            if (recorder.state === 'recording') {
-              setTimeout(() => recorder.stop(), 1000); 
+          
+          let stopped = false;
+          const stopRecording = () => {
+            if (stopped) return;
+            stopped = true;
+            setTimeout(() => {
+              if (recorder.state === 'recording') recorder.stop();
+            }, 300);
+            audioElement.removeEventListener('timeupdate', checkEnd);
+            audioElement.removeEventListener('ended', checkEnd);
+            audioElement.removeEventListener('pause', checkEnd);
+          };
+
+          const checkEnd = () => {
+            if (audioElement.currentTime >= finalEnd || audioElement.ended) {
+              stopRecording();
             }
           };
-          audioElement.addEventListener('ended', onEnded);
+
+          audioElement.addEventListener('timeupdate', checkEnd);
+          audioElement.addEventListener('ended', checkEnd);
+          audioElement.addEventListener('pause', () => {
+            if (audioElement.currentTime < finalEnd - 0.1) console.warn("Audio paused unexpectedly");
+            checkEnd();
+          });
+
         } catch (playErr) {
-          console.error("Playback failed during recording:", playErr);
+          console.error("Playback failed:", playErr);
           recorder.stop();
         }
       }, 500);
@@ -436,7 +597,7 @@ function App() {
     } catch (e: unknown) { 
       console.error("Recording error:", e); 
       setRendering(false); 
-      restoreAudioAfterRecording();
+      setIsRendering(false);
     }
   };
 
@@ -538,7 +699,7 @@ function App() {
             <span>{formatTime(currentTime)}</span>
             <span>{formatTime(duration)}</span>
           </div>
-          <input type="range" className="progress-slider" min="0" max={duration || 0} step="0.1" value={currentTime} onChange={(e) => seek(parseFloat(e.target.value))} disabled={!audioFile} />
+          <input type="range" className="progress-slider" min={startTime} max={endTime || duration || 0} step="0.1" value={currentTime} onChange={(e) => seek(parseFloat(e.target.value))} disabled={!audioFile} />
         </div>
 
         <div className="sidebar-tabs">
@@ -572,6 +733,56 @@ function App() {
                   <div className="upload-label"><span>{bgFile ? 'Change' : 'BG'}</span></div>
                 </div>
               </div>
+
+              {audioFile && (
+                <div style={{ marginTop: '1.5rem' }}>
+                  <h3>Track Trim</h3>
+                  <AudioTrimWaveform 
+                    buffer={audioBuffer} 
+                    startTime={startTime} 
+                    endTime={endTime} 
+                    currentTime={currentTime} 
+                    onSeek={seek} 
+                    zoomMode={zoomMode}
+                  />
+                  <div className="flex-col" style={{ gap: '1rem' }}>
+                    <div className="flex-col">
+                      <label className="label-row"><span>Start Time</span> <span className="value">{formatTime(startTime)}</span></label>
+                      <input type="range" min="0" max={duration} step="0.1" value={startTime} 
+                        onMouseDown={() => setTemporaryZoom('start')}
+                        onChange={(e) => {
+                          const val = parseFloat(e.target.value);
+                          setStartTime(val);
+                          if (val >= endTime) setEndTime(Math.min(val + 1, duration));
+                          setTemporaryZoom('start');
+                        }} />
+                    </div>
+                    <div className="flex-col">
+                      <label className="label-row"><span>End Time</span> <span className="value">{formatTime(endTime)}</span></label>
+                      <input type="range" min="0" max={duration} step="0.1" value={endTime} 
+                        onMouseDown={() => setTemporaryZoom('end')}
+                        onChange={(e) => {
+                          const val = parseFloat(e.target.value);
+                          setEndTime(val);
+                          if (val <= startTime) setStartTime(Math.max(val - 1, 0));
+                          setTemporaryZoom('end');
+                        }} />
+                    </div>
+                  </div>
+                  
+                  <div style={{ marginTop: '1rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <label className="label-row"><span>Audio Fade In</span><input type="checkbox" checked={audioFadeIn} onChange={(e) => setAudioFadeIn(e.target.checked)} /></label>
+                    <label className="label-row"><span>Audio Fade Out</span><input type="checkbox" checked={audioFadeOut} onChange={(e) => setAudioFadeOut(e.target.checked)} /></label>
+                  </div>
+                  {(audioFadeIn || audioFadeOut) && (
+                    <div className="flex-col" style={{ marginTop: '0.5rem' }}>
+                      <label className="label-row"><span>Audio Fade Duration</span> <span className="value">{fadeDuration}s</span></label>
+                      <input type="range" min="0.1" max="10" step="0.1" value={fadeDuration} onChange={(e) => setFadeDuration(parseFloat(e.target.value))} />
+                    </div>
+                  )}
+                </div>
+              )}
+
               <div style={{ marginTop: '1.5rem' }}>
                 <h3><Maximize size={14} style={{marginRight: 8}}/> Background Control</h3>
                 <div className="flex-col" style={{ gap: '1rem' }}>
@@ -862,6 +1073,7 @@ function App() {
                 </select>
               </div>
               <div className="flex-col" style={{ gap: '1.5rem' }}>
+                {/* ... keep Low Resource and Safe Render toggles ... */}
                 <div className="label-row">
                   <label style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-accent)' }}>
                     <Zap size={14} /> Low Resource Mode
@@ -895,10 +1107,82 @@ function App() {
                   <input type="range" min="0.5" max="10" step="0.5" value={fadeOutDuration} onChange={(e) => setFadeOutDuration(parseFloat(e.target.value))} />
                 </div>
               </div>
+
+              <div style={{ marginTop: '2.5rem', borderTop: '1px solid var(--border)', paddingTop: '1.5rem' }}>
+                <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><List size={16} /> Batch Processing</h3>
+                <div className="flex-col" style={{ gap: '1rem', marginTop: '1rem' }}>
+                  <button className="btn-secondary" onClick={() => {
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.multiple = true;
+                    input.accept = 'audio/*';
+                    input.onchange = (e) => {
+                      const files = Array.from((e.target as HTMLInputElement).files || []);
+                      if (files.length > 0) setBatchQueue(files);
+                    };
+                    input.click();
+                  }}>
+                    {batchQueue.length > 0 ? `Queue: ${batchQueue.length} Tracks` : 'Upload Multiple Tracks'}
+                  </button>
+                  
+                  {batchQueue.length > 0 && (
+                    <>
+                      <div className="flex-col" style={{ gap: '0.5rem' }}>
+                        <label className="label-row">
+                          <span>Download Mode</span>
+                          <select value={batchDownloadMode} onChange={(e) => setBatchDownloadMode(e.target.value as 'zip' | 'individual')}>
+                            <option value="zip">ZIP at End (Max 10-15 tracks)</option>
+                            <option value="individual">Individual (Infinite tracks - Safest)</option>
+                          </select>
+                        </label>
+                        <label className="label-row">
+                          <span>Randomize Style per Track</span>
+                          <input type="checkbox" checked={batchRandomize} onChange={(e) => setBatchRandomize(e.target.checked)} />
+                        </label>
+                      </div>
+                      
+                      <button className="btn-primary" onClick={() => {
+                        batchBlobsRef.current = []; // Clear previous results
+                        setIsBatchMode(true);
+                        setCurrentBatchIndex(0);
+                        const firstFile = batchQueue[0];
+                        setAudioFile(firstFile);
+                        setTitle(firstFile.name.replace(/\.[^/.]+$/, ""));
+                        if (batchRandomize) handleRandomize();
+                      }} disabled={rendering || isProcessing}>
+                        Start Batch Export
+                      </button>
+                      <span className="helper-text">
+                        {batchDownloadMode === 'zip' 
+                          ? 'Videos will be collected in RAM and zipped at the end.' 
+                          : 'Each video will download automatically as soon as it finishes.'}
+                      </span>
+                    </>
+                  )}
+                </div>
+              </div>
               
-              <button className="btn-primary" style={{ marginTop: '2.5rem' }} onClick={handleStartRecording} disabled={rendering || !audioFile || isProcessing}>
-                {rendering ? 'Exporting...' : 'Export Final Video'}
-              </button>
+              {!isBatchMode && (
+                <button className="btn-primary" style={{ marginTop: '2rem' }} onClick={() => handleStartRecording()} disabled={rendering || !audioFile || isProcessing}>
+                  {rendering ? 'Exporting...' : 'Export Final Video'}
+                </button>
+              )}
+
+              {isBatchMode && (
+                <div className="flex-col" style={{ gap: '1rem', marginTop: '1rem' }}>
+                  <div style={{ textAlign: 'center', color: 'var(--text-accent)', fontSize: '0.8rem' }}>
+                    Processing {currentBatchIndex + 1} of {batchQueue.length}...
+                  </div>
+                  <button className="btn-secondary" style={{ borderColor: '#ef4444', color: '#ef4444' }} onClick={handleStopBatch}>
+                    Stop & Export Current Batch
+                  </button>
+                </div>
+              )}
+              {zipProgress && (
+                <div style={{ marginTop: '1rem', textAlign: 'center', color: '#10b981', fontSize: '0.8rem' }}>
+                  {zipProgress}
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -925,7 +1209,8 @@ function App() {
             textMargin={textMargin}
             yoyoMode={yoyoMode} isPlaying={isPlaying} rendering={rendering} safeRender={safeRender} onProcessingChange={setIsProcessing}
             fadeInType={fadeInType} fadeInDuration={fadeInDuration} fadeOutType={fadeOutType} fadeOutDuration={fadeOutDuration}
-            audioElement={audioElement} />
+            audioElement={audioElement}
+            startTime={startTime} endTime={endTime} />
         </div>
       </main>
 

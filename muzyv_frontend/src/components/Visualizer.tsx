@@ -1,4 +1,4 @@
-import { useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
+import { useEffect, useRef, forwardRef, useImperativeHandle, memo } from 'react';
 
 interface VisualizerProps {
   analyser: AnalyserNode | null;
@@ -67,9 +67,11 @@ interface VisualizerProps {
   fadeOutType?: string;
   fadeOutDuration?: number;
   audioElement: HTMLAudioElement | null;
+  startTime?: number;
+  endTime?: number;
 }
 
-export const Visualizer = forwardRef<HTMLCanvasElement, VisualizerProps>((props, ref) => {
+export const Visualizer = memo(forwardRef<HTMLCanvasElement, VisualizerProps>((props, ref) => {
   const propsRef = useRef(props);
   propsRef.current = props;
 
@@ -108,7 +110,7 @@ export const Visualizer = forwardRef<HTMLCanvasElement, VisualizerProps>((props,
         let interval;
         onmessage = (e) => {
           if (e.data === 'start') {
-            interval = setInterval(() => postMessage('tick'), 10);
+            interval = setInterval(() => postMessage('tick'), 30);
           } else if (e.data === 'stop') {
             clearInterval(interval);
           }
@@ -143,11 +145,21 @@ export const Visualizer = forwardRef<HTMLCanvasElement, VisualizerProps>((props,
   const fireRef = useRef<{x: number, y: number, life: number, size: number}[]>([]);
   const swarmRef = useRef<{x: number, y: number, vx: number, vy: number}[]>([]);
   const neuralNetRef = useRef<{x: number, y: number, vx: number, vy: number}[]>([]);
+  const meshRef = useRef<{x: number, y: number, vx: number, vy: number}[]>([]);
+  const firefliesRef = useRef<{x: number, y: number, vx: number, vy: number, size: number}[]>([]);
+  const snowRef = useRef<{x: number, y: number, speed: number, size: number}[]>([]);
+  const confettiRef = useRef<{x: number, y: number, vx: number, vy: number, color: string, rot: number, rSpeed: number}[]>([]);
   const vinesRef = useRef<{x: number, y: number, angle: number, length: number, color: string}[]>([]);
 
   const clearYoyoFrames = () => {
-    yoyoFramesRef.current.forEach(b => { try { b.close(); } catch(e) {} });
-    yoyoFramesRef.current = [];
+    if (yoyoFramesRef.current.length > 0) {
+      yoyoFramesRef.current.forEach(b => { 
+        try { 
+          if (b && typeof b.close === 'function') b.close(); 
+        } catch(e) {} 
+      });
+      yoyoFramesRef.current = [];
+    }
     yoyoIndexRef.current = 0;
     yoyoDirRef.current = 1;
   };
@@ -166,19 +178,27 @@ export const Visualizer = forwardRef<HTMLCanvasElement, VisualizerProps>((props,
   };
 
   useEffect(() => {
-    matrixDropsRef.current = [];
-    starBurstRef.current = [];
-    fireRef.current = [];
-    swarmRef.current = [];
-    neuralNetRef.current = [];
-    vinesRef.current = [];
-  }, [props.vizType]);
+    const clearBuffers = () => {
+      matrixDropsRef.current = [];
+      starBurstRef.current = [];
+      fireRef.current = [];
+      swarmRef.current = [];
+      neuralNetRef.current = [];
+      meshRef.current = [];
+      firefliesRef.current = [];
+      snowRef.current = [];
+      confettiRef.current = [];
+      vinesRef.current = [];
+    };
+    clearBuffers();
+    return () => clearBuffers();
+  }, [props.vizType, props.audioElement]);
 
-  // Background Logic
   useEffect(() => {
     let isCancelled = false;
     const { yoyoMode } = propsRef.current;
 
+    // Explicitly destroy old video/image objects to free VRAM
     if (bgVideoRef.current) {
       bgVideoRef.current.pause();
       bgVideoRef.current.src = "";
@@ -259,12 +279,12 @@ export const Visualizer = forwardRef<HTMLCanvasElement, VisualizerProps>((props,
     }
 
     return () => { isCancelled = true; };
-  }, [bgUrl, bgType, props.yoyoMode, w, h]);
+  }, [bgUrl, bgType, props.yoyoMode, w, h, audioElement]);
 
   useEffect(() => {
     bgTimeRef.current = 0;
     frozenTimeRef.current = 0;
-  }, [bgUrl]);
+  }, [bgUrl, audioElement]);
 
   useImperativeHandle(ref, () => canvasRef.current!, []);
 
@@ -462,14 +482,15 @@ export const Visualizer = forwardRef<HTMLCanvasElement, VisualizerProps>((props,
           let vCS = p.barColor; let vCE = p.barColorEnd || '#8b5cf6';
           if (p.vizGradientMotion) { const t = (Math.sin(animTime * 0.001) + 1) / 2; vCS = lerpColor(p.barColor, vCE, t); vCE = lerpColor(vCE, p.barColor, t); }
           let fs: string | CanvasGradient = vCS;
-          if(p.useGradient || p.vizGradientMotion) { const g=ctx.createLinearGradient(0, height/2, 0, -height/2); g.addColorStop(0, vCS); g.addColorStop(1, vCE); fs=g; }
+          // Fixed gradient coordinates to be relative to the visualizer's local space (centered at 0,0)
+          if(p.useGradient || p.vizGradientMotion) { const g=ctx.createLinearGradient(0, height*0.4, 0, -height*0.4); g.addColorStop(0, vCS); g.addColorStop(1, vCE); fs=g; }
           ctx.fillStyle = fs; ctx.strokeStyle = fs; ctx.lineWidth = Math.max(0.1, (p.vizThickness ?? 2) * responsiveScale);
 
           const drawViz = () => {
             if (p.vizType === 'spectrum') {
                 const bW = (width / len) * 2; for (let i = 0; i < len; i++) ctx.fillRect(Math.floor(-width/2 + i*(bW+1)), 0, Math.max(1, Math.floor(bW)), Math.floor(-vD[i] * height * 0.5 * curSens));
             } else if (p.vizType === 'mirror_spectrum') {
-                const bW = (width / len) * 4; for (let i = 0; i < len; i++) { const vx = Math.floor(-width/2 + i*(bW+1)); ctx.fillRect(vx, 0, Math.max(1, Math.floor(bW)), Math.floor(-vD[i] * height * 0.5 * curSens)); ctx.fillRect(vx, 0, Math.max(1, Math.floor(bW)), Math.floor(vD[i] * height * 0.5 * curSens)); }
+                const bW = (width / len) * 2; for (let i = 0; i < len; i++) { const vx = Math.floor(-width/2 + i*(bW+1)); ctx.fillRect(vx, 0, Math.max(1, Math.floor(bW)), Math.floor(-vD[i] * height * 0.5 * curSens)); ctx.fillRect(vx, 0, Math.max(1, Math.floor(bW)), Math.floor(vD[i] * height * 0.5 * curSens)); }
             } else if (p.vizType === 'bars_3d') {
                 const bW = (width / 40) * 0.6; for(let i=0; i<40; i++) { const hV = vD[Math.floor(i*(len/40))%len]*height*0.8*curSens; ctx.save(); ctx.translate(Math.floor((i/40)*width-width/2), 0); ctx.transform(1, 0.4, 0, 1, 0, 0); ctx.fillRect(0, 0, Math.max(1, Math.floor(bW)), Math.floor(-hV)); ctx.strokeRect(0, 0, Math.max(1, Math.floor(bW)), Math.floor(-hV)); ctx.restore(); }
             } else if (p.vizType === 'bar_rain') {
@@ -484,7 +505,7 @@ export const Visualizer = forwardRef<HTMLCanvasElement, VisualizerProps>((props,
                 ctx.beginPath(); let wx=-width/2; for(let i=0; i<len; i++){ ctx.lineTo(Math.floor(wx),Math.floor(vD[i]*height*0.4*curSens)); wx+=width/len; } ctx.stroke();
                 if(p.vizType === 'dual_wave'){ ctx.beginPath(); wx=-width/2; for(let i=0; i<len; i++){ ctx.lineTo(Math.floor(wx),Math.floor(-vD[i]*height*0.4*curSens)); wx+=width/len; } ctx.stroke(); }
             } else if (p.vizType === 'circle' || p.vizType === 'ring' || p.vizType === 'pulse') {
-                const r=Math.max(1, minDim*0.25+bass*50*curSens); const count=120; for(let i=0; i<count; i++){ const v=vD[Math.floor(i*(len/count))%len]; const rad=(Math.PI*2)*(i/count); ctx.beginPath(); if(p.vizType==='ring') ctx.arc(Math.floor(Math.cos(rad)*(r+v*minDim*0.3*curSens)), Math.floor(Math.sin(rad)*(r+v*minDim*0.3*curSens)), Math.max(0.1, Math.floor(2+v*10)), 0, Math.PI*2), ctx.fill(); else ctx.moveTo(Math.floor(Math.cos(rad)*r), Math.floor(Math.sin(rad)*r)), ctx.lineTo(Math.floor(Math.cos(rad)*(Math.max(0.1, r+v*minDim*0.3*curSens))), Math.floor(Math.sin(rad)*(Math.max(0.1, r+v*minDim*0.3*curSens)))), ctx.stroke(); }
+                const r=Math.max(1, minDim*0.25+bass*50*curSens); const count=120; for(let i=0; i<count; i++){ const v=vD[Math.floor(i*(len/count))%len]; const rad=(Math.PI*2)*(i/count); ctx.beginPath(); if(p.vizType==='ring') { ctx.arc(Math.floor(Math.cos(rad)*(r+v*minDim*0.3*curSens)), Math.floor(Math.sin(rad)*(r+v*minDim*0.3*curSens)), Math.max(0.1, Math.floor(2+v*10)), 0, Math.PI*2); ctx.fill(); } else { ctx.moveTo(Math.floor(Math.cos(rad)*r), Math.floor(Math.sin(rad)*r)); ctx.lineTo(Math.floor(Math.cos(rad)*(Math.max(0.1, r+v*minDim*0.3*curSens))), Math.floor(Math.sin(rad)*(Math.max(0.1, r+v*minDim*0.3*curSens)))); ctx.stroke(); } }
             } else if (p.vizType === 'shockwave') {
                 for(let i=0; i<10; i++){ const r=(animTime*0.3+i*100)%1000; ctx.beginPath(); ctx.ellipse(0,0,Math.max(0.1, Math.floor(r)),Math.max(0.1, Math.floor(r*0.5)),0,0,Math.PI*2); ctx.globalAlpha=Math.max(0, (1-r/1000)); ctx.stroke(); }
             } else if (p.vizType === 'dna') {
@@ -497,10 +518,88 @@ export const Visualizer = forwardRef<HTMLCanvasElement, VisualizerProps>((props,
                 ctx.font="12px monospace"; matrixDropsRef.current.forEach(d=>{ if(p.isPlaying || p.rendering)d.y+=d.speed; if(d.y>height/2) d.y=-height/2; ctx.fillText(d.chars[Math.floor(Math.random()*2)], Math.floor(d.x), Math.floor(d.y)); });
             } else if (p.vizType === 'neural_net') {
                 if(neuralNetRef.current.length<20) neuralNetRef.current=Array.from({length:20},()=>({x:(Math.random()-0.5)*width, y:(Math.random()-0.5)*height, vx:Math.random()-0.5, vy:Math.random()-0.5}));
-                for (let i = 0; i < neuralNetRef.current.length; i++) { const n = neuralNetRef.current[i]; if(p.isPlaying || p.rendering){n.x+=n.vx*(1+vD[i%len]*5); n.y+=n.vy*(1+vD[i%len]*5);} ctx.beginPath(); ctx.arc(Math.floor(n.x),Math.floor(n.y),5,0,Math.PI*2); ctx.fill(); neuralNetRef.current.forEach(n2=>{ if(Math.hypot(n.x-n2.x,n.y-n2.y)<200) ctx.beginPath(),ctx.moveTo(Math.floor(n.x),Math.floor(n.y)),ctx.lineTo(Math.floor(n2.x),Math.floor(n2.y)),ctx.stroke(); }); }
+                for (let i = 0; i < neuralNetRef.current.length; i++) { 
+                  const n = neuralNetRef.current[i]; 
+                  if(p.isPlaying || p.rendering){
+                    n.x+=n.vx*(1+vD[i%len]*5); n.y+=n.vy*(1+vD[i%len]*5);
+                    if (Math.abs(n.x) > width/2) { n.x = Math.sign(n.x)*width/2; n.vx *= -1; }
+                    if (Math.abs(n.y) > height/2) { n.y = Math.sign(n.y)*height/2; n.vy *= -1; }
+                  } 
+                  ctx.beginPath(); ctx.arc(Math.floor(n.x),Math.floor(n.y),5,0,Math.PI*2); ctx.fill(); 
+                  neuralNetRef.current.forEach(n2=>{ if(Math.hypot(n.x-n2.x,n.y-n2.y)<200) ctx.beginPath(),ctx.moveTo(Math.floor(n.x),Math.floor(n.y)),ctx.lineTo(Math.floor(n2.x),Math.floor(n2.y)),ctx.stroke(); }); 
+                }
+            } else if (p.vizType === 'particle_mesh') {
+                if(meshRef.current.length<40) meshRef.current=Array.from({length:40},()=>({x:(Math.random()-0.5)*width, y:(Math.random()-0.5)*height, vx:(Math.random()-0.5)*2, vy:(Math.random()-0.5)*2}));
+                for (let i = 0; i < meshRef.current.length; i++) {
+                  const n = meshRef.current[i];
+                  if(p.isPlaying || p.rendering){
+                    n.x+=n.vx*(1+vD[i%len]*10); n.y+=n.vy*(1+vD[i%len]*10);
+                    if (Math.abs(n.x) > width/2) { n.x = Math.sign(n.x)*width/2; n.vx *= -1; }
+                    if (Math.abs(n.y) > height/2) { n.y = Math.sign(n.y)*height/2; n.vy *= -1; }
+                  }
+                  ctx.beginPath(); ctx.arc(Math.floor(n.x), Math.floor(n.y), 2+vD[i%len]*10, 0, Math.PI*2); ctx.fill();
+                  for(let j=i+1; j<meshRef.current.length; j++){
+                    const n2 = meshRef.current[j];
+                    const dist = Math.hypot(n.x-n2.x, n.y-n2.y);
+                    if(dist < 150){
+                      ctx.globalAlpha = (1 - dist/150) * (p.vizOpacity ?? 1.0);
+                      ctx.beginPath(); ctx.moveTo(Math.floor(n.x), Math.floor(n.y)); ctx.lineTo(Math.floor(n2.x), Math.floor(n2.y)); ctx.stroke();
+                      ctx.globalAlpha = p.vizOpacity ?? 1.0;
+                    }
+                  }
+                }
+            } else if (p.vizType === 'fireflies') {
+                if(firefliesRef.current.length<30) firefliesRef.current=Array.from({length:30},()=>({x:(Math.random()-0.5)*width, y:(Math.random()-0.5)*height, vx:(Math.random()-0.5), vy:(Math.random()-0.5), size:2+Math.random()*4}));
+                firefliesRef.current.forEach((f, i) => {
+                  if(p.isPlaying || p.rendering){
+                    f.x += f.vx + Math.sin(animTime*0.001+i)*2; f.y += f.vy + Math.cos(animTime*0.001+i)*2;
+                    if (Math.abs(f.x) > width/2) { f.x = Math.sign(f.x)*width/2; f.vx *= -1; }
+                    if (Math.abs(f.y) > height/2) { f.y = Math.sign(f.y)*height/2; f.vy *= -1; }
+                  }
+                  const pulse = 0.5 + Math.sin(animTime*0.005+i)*0.5;
+                  ctx.globalAlpha = pulse * (p.vizOpacity ?? 1.0);
+                  ctx.beginPath(); ctx.arc(Math.floor(f.x), Math.floor(f.y), f.size + vD[i%len]*20, 0, Math.PI*2); ctx.fill();
+                });
+                ctx.globalAlpha = p.vizOpacity ?? 1.0;
+            } else if (p.vizType === 'snowfall') {
+                if(snowRef.current.length<100) snowRef.current=Array.from({length:100},()=>({x:(Math.random()-0.5)*width, y:(Math.random()-0.5)*height, speed:1+Math.random()*3, size:1+Math.random()*3}));
+                snowRef.current.forEach((s, i) => {
+                  if(p.isPlaying || p.rendering){
+                    s.y += s.speed * (1 + vD[i%len]*15); s.x += Math.sin(animTime*0.001+i);
+                    if (s.y > height/2) s.y = -height/2;
+                    if (Math.abs(s.x) > width/2) s.x = -s.x;
+                  }
+                  ctx.beginPath(); ctx.arc(Math.floor(s.x), Math.floor(s.y), s.size, 0, Math.PI*2); ctx.fill();
+                });
+            } else if (p.vizType === 'confetti') {
+                if(confettiRef.current.length < 100 && (p.isPlaying || p.rendering) && bass > 0.6){
+                  for(let i=0; i<10; i++) confettiRef.current.push({
+                    x:0, y:0, vx:(Math.random()-0.5)*30, vy:(Math.random()-0.5)*30,
+                    color: lerpColor(p.barColor, vCE, Math.random()), rot: Math.random()*Math.PI, rSpeed: (Math.random()-0.5)*0.2
+                  });
+                }
+                for(let i=confettiRef.current.length-1; i>=0; i--){
+                  const c = confettiRef.current[i];
+                  if(p.isPlaying || p.rendering){
+                    c.x += c.vx; c.y += c.vy; c.vy += 0.5; // gravity
+                    c.rot += c.rSpeed;
+                    if(Math.abs(c.x) > width/2 || c.y > height/2) confettiRef.current.splice(i, 1);
+                  }
+                  ctx.save(); ctx.translate(c.x, c.y); ctx.rotate(c.rot);
+                  ctx.fillStyle = c.color; ctx.fillRect(-5, -5, 10, 10); ctx.restore();
+                }
             } else if (p.vizType === 'swarm') {
                 if(swarmRef.current.length<50) swarmRef.current=Array.from({length:50},()=>({x:0,y:0,vx:0,vy:0}));
-                for (let i = 0; i < swarmRef.current.length; i++) { const s = swarmRef.current[i]; if(p.isPlaying || p.rendering){s.x+=(Math.random()-0.5)*10+s.vx; s.y+=(Math.random()-0.5)*10+s.vy; s.vx*=0.9; s.vy*=0.9; if(vD[i%len]>0.6){s.vx+=(Math.random()-0.5)*20; s.vy+=(Math.random()-0.5)*20;}} ctx.fillRect(Math.floor(s.x),Math.floor(s.y),4,4); }
+                for (let i = 0; i < swarmRef.current.length; i++) { 
+                  const s = swarmRef.current[i]; 
+                  if(p.isPlaying || p.rendering){
+                    s.x+=(Math.random()-0.5)*10+s.vx; s.y+=(Math.random()-0.5)*10+s.vy; s.vx*=0.9; s.vy*=0.9; 
+                    if(vD[i%len]>0.6){s.vx+=(Math.random()-0.5)*20; s.vy+=(Math.random()-0.5)*20;}
+                    if (Math.abs(s.x) > width/2) { s.x = Math.sign(s.x)*width/2; s.vx *= -1; }
+                    if (Math.abs(s.y) > height/2) { s.y = Math.sign(s.y)*height/2; s.vy *= -1; }
+                  } 
+                  ctx.fillRect(Math.floor(s.x),Math.floor(s.y),4,4); 
+                }
             } else if (p.vizType === 'segmented_bar') {
                 const bW=(width/len)*2; for(let i=0; i<len; i++) for(let j=0; j<vD[i]*15*curSens; j++) ctx.fillRect(Math.floor(-width/2+i*(bW+1)), Math.floor(-j*12*responsiveScale), Math.max(1, Math.floor(bW)), Math.floor(-10*responsiveScale));
             } else if (p.vizType === 'lightning') {
@@ -611,22 +710,7 @@ export const Visualizer = forwardRef<HTMLCanvasElement, VisualizerProps>((props,
 
         const margin = ((p.textMargin ?? 5) / 100) * width;
         const baseSize = 80 * responsiveScale * (p.fontSizeScale ?? 1.0) * bS;
-        ctx.font = `bold ${Math.floor(baseSize)}px "${p.fontFamily}", sans-serif`;
         
-        // Reactive Brightness for Glow mode
-        let finalTextColor = p.textColor;
-        if (p.textReact === 'glow' && rV > 0.1) {
-          const rgb = hexToRgb(p.textColor);
-          const boost = Math.floor(rV * 100);
-          finalTextColor = `rgb(${Math.min(255, rgb.r + boost)}, ${Math.min(255, rgb.g + boost)}, ${Math.min(255, rgb.b + boost)})`;
-        }
-        ctx.fillStyle = finalTextColor; 
-        
-        if (p.textGlow || p.textReact === 'glow') {
-          ctx.shadowColor = p.textReact === 'glow' ? finalTextColor : p.textColor;
-          ctx.shadowBlur = (p.textGlow ? 15 * responsiveScale : 0) + rGlow;
-        }
-
         let tx = width / 2, ty = height / 2;
         let align: CanvasTextAlign = 'center';
 
@@ -639,6 +723,31 @@ export const Visualizer = forwardRef<HTMLCanvasElement, VisualizerProps>((props,
         tx += (p.textOffsetX ?? 0) * (width / 100) + tOX;
         ty += (p.textOffsetY ?? 0) * (height / 100) + tOY;
 
+        // Text Gradient Logic
+        let tCS = p.textColor; let tCE = p.textColorEnd || '#8b5cf6';
+        if (p.textGradientMotion) { const t = (Math.sin(animTime * 0.0012) + 1) / 2; tCS = lerpColor(p.textColor, tCE, t); tCE = lerpColor(tCE, p.textColor, t); }
+        
+        let finalTextColor: string | CanvasGradient = tCS;
+        if (p.useTextGradient || p.textGradientMotion) {
+          const g = ctx.createLinearGradient(tx, ty - baseSize, tx, ty + baseSize*0.5);
+          g.addColorStop(0, tCS); g.addColorStop(1, tCE);
+          finalTextColor = g;
+        }
+
+        // Reactive Brightness for Glow mode (if not using gradient)
+        if (p.textReact === 'glow' && rV > 0.1 && !p.useTextGradient && !p.textGradientMotion) {
+          const rgb = hexToRgb(p.textColor);
+          const boost = Math.floor(rV * 100);
+          finalTextColor = `rgb(${Math.min(255, rgb.r + boost)}, ${Math.min(255, rgb.g + boost)}, ${Math.min(255, rgb.b + boost)})`;
+        }
+        ctx.fillStyle = finalTextColor; 
+        
+        if (p.textGlow || p.textReact === 'glow') {
+          ctx.shadowColor = p.textReact === 'glow' ? (typeof finalTextColor === 'string' ? finalTextColor : p.textColor) : p.textColor;
+          ctx.shadowBlur = (p.textGlow ? 15 * responsiveScale : 0) + rGlow;
+        }
+
+        ctx.font = `bold ${Math.floor(baseSize)}px "${p.fontFamily}", sans-serif`;
         ctx.textAlign = align;
         
         if (p.textOutline) {
@@ -661,18 +770,20 @@ export const Visualizer = forwardRef<HTMLCanvasElement, VisualizerProps>((props,
         if (p.scanlines) { ctx.fillStyle = 'rgba(0,0,0,0.2)'; for (let i = 0; i < height; i += 4) ctx.fillRect(0, i, width, 1); }
 
         // --- 6. FADES ---
-        if (audioElement?.duration) {
+        if (audioElement) {
           const ct = audioElement.currentTime;
-          const du = audioElement.duration;
+          const du = p.endTime || audioElement.duration;
+          const st = p.startTime || 0;
           let a = 1.0;
           let ft = 'none';
           
-          if (ct < (p.fadeInDuration ?? 2)) {
+          if (ct < st + (p.fadeInDuration ?? 2)) {
             ft = p.fadeInType ?? 'none';
-            a = ct / (p.fadeInDuration ?? 2);
+            a = Math.max(0, (ct - st) / (p.fadeInDuration ?? 2));
           } else if (ct > du - (p.fadeOutDuration ?? 2)) {
             ft = p.fadeOutType ?? 'none';
-            a = (du - ct) / (p.fadeOutDuration ?? 2);
+            a = Math.max(0, (du - ct) / (p.fadeOutDuration ?? 2));
+            if (ct >= du) a = 0; // Force full fade at end
           }
 
           if (a < 1.0 && ft !== 'none') {
@@ -737,4 +848,4 @@ export const Visualizer = forwardRef<HTMLCanvasElement, VisualizerProps>((props,
       <canvas ref={canvasRef} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
     </div>
   );
-});
+}));

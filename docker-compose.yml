@@ -2,6 +2,7 @@ version: '3.8'
 
 services:
   muzyv-frontend:
+    image: muzyv-frontend:0.1.0
     build:
       context: .
       dockerfile: Dockerfile
