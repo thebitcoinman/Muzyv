@@ -1,0 +1,10 @@
+node_modules
+dist
+.git
+.gitignore
+README.md
+muzyv_frontend/node_modules
+muzyv_frontend/dist
+muzyv_frontend/.vite
+.DS_Store
+*.log
