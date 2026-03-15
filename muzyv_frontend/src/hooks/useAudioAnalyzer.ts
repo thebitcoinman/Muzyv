@@ -199,10 +199,26 @@ export const useAudioAnalyzer = (audioFile: File | null) => {
         audio.src = "";
         
         // Final explicit disconnect on unmount
-        if (sourceRef.current) sourceRef.current.disconnect();
-        if (fadeGainRef.current) fadeGainRef.current.disconnect();
-        if (outputGainRef.current) outputGainRef.current.disconnect();
-        if (anaRef.current) anaRef.current.disconnect();
+        try {
+          if (sourceRef.current) {
+            sourceRef.current.disconnect();
+            sourceRef.current = null;
+          }
+          if (fadeGainRef.current) {
+            fadeGainRef.current.disconnect();
+            fadeGainRef.current = null;
+          }
+          if (outputGainRef.current) {
+            outputGainRef.current.disconnect();
+            outputGainRef.current = null;
+          }
+          if (anaRef.current) {
+            anaRef.current.disconnect();
+            anaRef.current = null;
+          }
+        } catch (err) {
+          console.warn("Audio cleanup error:", err);
+        }
       };
     }
   }, [audioFile]);
@@ -210,11 +226,21 @@ export const useAudioAnalyzer = (audioFile: File | null) => {
   const togglePlay = useCallback(() => {
     if (audioRef.current && globalAudioContext) {
       if (audioRef.current.paused) {
-        globalAudioContext.resume();
-        if (audioRef.current.currentTime < startTimeRef.current || audioRef.current.currentTime >= endTimeRef.current) {
-          audioRef.current.currentTime = startTimeRef.current;
+        if (globalAudioContext.state === 'suspended') {
+          globalAudioContext.resume().then(() => {
+            if (audioRef.current) {
+              if (audioRef.current.currentTime < startTimeRef.current || audioRef.current.currentTime >= endTimeRef.current) {
+                audioRef.current.currentTime = startTimeRef.current;
+              }
+              audioRef.current.play().catch(() => {});
+            }
+          });
+        } else {
+          if (audioRef.current.currentTime < startTimeRef.current || audioRef.current.currentTime >= endTimeRef.current) {
+            audioRef.current.currentTime = startTimeRef.current;
+          }
+          audioRef.current.play().catch(() => {});
         }
-        audioRef.current.play().catch(() => {});
       } else {
         audioRef.current.pause();
       }

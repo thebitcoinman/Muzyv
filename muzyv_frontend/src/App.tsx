@@ -93,6 +93,36 @@ const FONT_OPTIONS = [
   { label: 'Stalinist One', value: 'Stalinist One' },
   { label: 'Syne Mono', value: 'Syne Mono' },
   { label: 'Zain', value: 'Zain' },
+  { label: 'Lexend', value: 'Lexend' },
+  { label: 'Poppins', value: 'Poppins' },
+  { label: 'Raleway', value: 'Raleway' },
+  { label: 'Open Sans', value: 'Open Sans' },
+  { label: 'Lato', value: 'Lato' },
+  { label: 'Merriweather', value: 'Merriweather' },
+  { label: 'Noto Sans', value: 'Noto Sans' },
+  { label: 'Stardos Stencil', value: 'Stardos Stencil' },
+  { label: 'UnifrakturMaguntia', value: 'UnifrakturMaguntia' },
+  { label: 'Metal Mania', value: 'Metal Mania' },
+  { label: 'Nosifer', value: 'Nosifer' },
+  { label: 'Frijole', value: 'Frijole' },
+  { label: 'Rye', value: 'Rye' },
+  { label: 'Sancreek', value: 'Sancreek' },
+  { label: 'Bungee', value: 'Bungee' },
+  { label: 'Bungee Outline', value: 'Bungee Outline' },
+  { label: 'Codystar', value: 'Codystar' },
+  { label: 'Monoton', value: 'Monoton' },
+  { label: 'Special Elite', value: 'Special Elite' },
+  { label: 'Ultra', value: 'Ultra' },
+  { label: 'Nabla', value: 'Nabla' },
+  { label: 'Honk', value: 'Honk' },
+  { label: 'Bungee Spice', value: 'Bungee Spice' },
+  { label: 'Rubik Glitch', value: 'Rubik Glitch' },
+  { label: 'Eater', value: 'Eater' },
+  { label: 'Butcherman', value: 'Butcherman' },
+  { label: 'Creepster', value: 'Creepster' },
+  { label: 'Flavors', value: 'Flavors' },
+  { label: 'Shojumaru', value: 'Shojumaru' },
+  { label: 'MedievalSharp', value: 'MedievalSharp' },
 ].sort((a, b) => a.label.localeCompare(b.label));
 
 const PRESET_POSITIONS = [
@@ -105,70 +135,139 @@ const PRESET_POSITIONS = [
   { label: 'B-Right', value: 'bottom_right' },
 ];
 
-const VIZ_OPTIONS = [
-  { label: '1. Spectrum Bars', value: 'spectrum' },
-  { label: '2. Mirror Spectrum', value: 'mirror_spectrum' },
-  { label: '3. 3D Floor Bars', value: 'bars_3d' },
-  { label: '4. Bar Rain', value: 'bar_rain' },
-  { label: '5. Cyber City', value: 'cyber_city' },
-  { label: '6. Pixel Blocks', value: 'pixel_blocks' },
-  { label: '7. Digital Rain', value: 'digital_rain' },
-  { label: '8. LED Wall', value: 'led_wall' },
-  { label: '9. Segmented Bar', value: 'segmented_bar' },
-  { label: '10. Classic Wave', value: 'wave' },
-  { label: '11. Dual Wave', value: 'dual_wave' },
-  { label: '12. Wave Ribbon', value: 'ribbon' },
-  { label: '13. Spectrum Wave', value: 'spectrum_wave' },
-  { label: '14. Lightning', value: 'lightning' },
-  { label: '15. Glitch Vines', value: 'glitch_vines' },
-  { label: '16. Heartbeat (EKG)', value: 'heartbeat' },
-  { label: '17. Cosmic Strings', value: 'cosmic_strings' },
-  { label: '18. Seismic', value: 'seismic' },
-  { label: '19. Circular Spectrum', value: 'circle' },
-  { label: '20. Concentric Rings', value: 'ring' },
-  { label: '21. Pulse Circle', value: 'pulse' },
-  { label: '22. Radial Iris', value: 'radial_spectrum' },
-  { label: '23. Audio Rings', value: 'audio_rings' },
-  { label: '24. Cyber Rings', value: 'rings_cyber' },
-  { label: '25. Spiral Galaxy', value: 'spiral' },
-  { label: '26. Orbitals', value: 'orbitals' },
-  { label: '27. Radar Scan', value: 'radar' },
-  { label: '28. Mandala', value: 'mandala' },
-  { label: '29. 3D Cubes', value: 'cubes_3d' },
-  { label: '30. 3D Sphere', value: 'sphere_3d' },
-  { label: '31. 3D Tunnel', value: 'tunnel_3d' },
-  { label: '32. Neon Grid', value: 'neon_grid' },
-  { label: '33. Hexagon Grid', value: 'hexagon' },
-  { label: '34. Polygon World', value: 'poly_world' },
-  { label: '35. Pyramids', value: 'pyramids' },
-  { label: '36. Crystal', value: 'crystal' },
-  { label: '37. Starfield', value: 'starfield' },
-  { label: '38. Particles', value: 'particles' },
-  { label: '39. Particle Mesh', value: 'particle_mesh' },
-  { label: '40. Fireflies', value: 'fireflies' },
-  { label: '41. Snowfall', value: 'snowfall' },
-  { label: '42. Confetti', value: 'confetti' },
-  { label: '43. Shockwave', value: 'shockwave' },
-  { label: '40. Gravity Well', value: 'gravity_well' },
-  { label: '41. Star Burst', value: 'star_burst' },
-  { label: '42. Vortex', value: 'vortex' },
-  { label: '43. Vector Field', value: 'vector_field' },
-  { label: '44. Swarm', value: 'swarm' },
-  { label: '45. DNA Helix', value: 'dna' },
-  { label: '46. Lava Lamp', value: 'lava' },
-  { label: '47. Plasma Ball', value: 'plasma' },
-  { label: '48. Fractal Tree', value: 'fractal_tree' },
-  { label: '49. Floating Orbs', value: 'floating_orbs' },
-  { label: '50. Liquid Flow', value: 'liquid_flow' },
-  { label: '51. Aurora', value: 'aurora' },
-  { label: '52. Deep Sea', value: 'deep_sea' },
-  { label: '53. Abstract Clouds', value: 'abstract_clouds' },
-  { label: '54. Solar Flare', value: 'solar_flare' },
-  { label: '55. Kaleido Mesh', value: 'kaleido_mesh' },
-  { label: '56. Techno Wires', value: 'techno_wires' },
-  { label: '57. Neural Net', value: 'neural_net' },
-  { label: '58. Matrix Rain', value: 'matrix' },
-  { label: '59. Fire', value: 'fire' },
+const VIZ_CATEGORIES = [
+  {
+    name: 'Bars & Spectrum',
+    options: [
+      { label: 'Spectrum Bars', value: 'spectrum' },
+      { label: 'Mirror Spectrum', value: 'mirror_spectrum' },
+      { label: 'Bar Rain', value: 'bar_rain' },
+      { label: 'Cyber City', value: 'cyber_city' },
+      { label: 'Pixel Blocks', value: 'pixel_blocks' },
+      { label: 'LED Wall', value: 'led_wall' },
+      { label: 'Segmented Bar', value: 'segmented_bar' },
+    ]
+  },
+  {
+    name: 'Waves & Lines',
+    options: [
+      { label: 'Classic Wave', value: 'wave' },
+      { label: 'Dual Wave', value: 'dual_wave' },
+      { label: 'Wave Ribbon', value: 'ribbon' },
+      { label: 'Spectrum Wave', value: 'spectrum_wave' },
+      { label: 'Lightning', value: 'lightning' },
+      { label: 'Glitch Vines', value: 'glitch_vines' },
+      { label: 'Heartbeat (EKG)', value: 'heartbeat' },
+      { label: 'Cosmic Strings', value: 'cosmic_strings' },
+      { label: 'Seismic', value: 'seismic' },
+      { label: 'Liquid Flow', value: 'liquid_flow' },
+      { label: 'Aurora', value: 'aurora' },
+      { label: 'Deep Sea', value: 'deep_sea' },
+      { label: 'Techno Wires', value: 'techno_wires' },
+    ]
+  },
+  {
+    name: 'Circular & Radial',
+    options: [
+      { label: 'Circular Spectrum', value: 'circle' },
+      { label: 'Concentric Rings', value: 'ring' },
+      { label: 'Pulse Circle', value: 'pulse' },
+      { label: 'Radial Iris', value: 'radial_spectrum' },
+      { label: 'Audio Rings', value: 'audio_rings' },
+      { label: 'Cyber Rings', value: 'rings_cyber' },
+      { label: 'Spiral Galaxy', value: 'spiral' },
+      { label: 'Orbitals', value: 'orbitals' },
+      { label: 'Radar Scan', value: 'radar' },
+      { label: 'Mandala', value: 'mandala' },
+      { label: 'Vortex', value: 'vortex' },
+    ]
+  },
+  {
+    name: '3D & Geometric',
+    options: [
+      { label: '3D Floor Bars', value: 'bars_3d' },
+      { label: '3D Cubes', value: 'cubes_3d' },
+      { label: '3D Sphere', value: 'sphere_3d' },
+      { label: '3D Tunnel', value: 'tunnel_3d' },
+      { label: 'Neon Grid', value: 'neon_grid' },
+      { label: 'Hexagon Grid', value: 'hexagon' },
+      { label: 'Polygon World', value: 'poly_world' },
+      { label: 'Pyramids', value: 'pyramids' },
+      { label: 'Crystal', value: 'crystal' },
+      { label: 'Isometric Grid', value: 'isometric_grid' },
+      { label: 'Torus 3D', value: 'torus_3d' },
+      { label: '3D DNA Helix', value: 'dna' },
+      { label: '3D Wave Floor', value: '3d_wave_floor' },
+    ]
+  },
+  {
+    name: 'Particles & Physics',
+    options: [
+      { label: 'Starfield', value: 'starfield' },
+      { label: 'Floating Particles', value: 'particles' },
+      { label: 'Particle Mesh', value: 'particle_mesh' },
+      { label: 'Fireflies', value: 'fireflies' },
+      { label: 'Snowfall', value: 'snowfall' },
+      { label: 'Confetti', value: 'confetti' },
+      { label: 'Shockwave', value: 'shockwave' },
+      { label: 'Gravity Well', value: 'gravity_well' },
+      { label: 'Star Burst', value: 'star_burst' },
+      { label: 'Vector Field', value: 'vector_field' },
+      { label: 'Particle Swarm', value: 'swarm' },
+      { label: 'Particle Attractor', value: 'attractor' },
+      { label: 'Flow Field', value: 'flow_field' },
+      { label: 'Particle Orbit', value: 'particle_orbit' },
+    ]
+  },
+  {
+    name: 'Abstract & Effects',
+    options: [
+      { label: 'Lava Lamp', value: 'lava' },
+      { label: 'Plasma Ball', value: 'plasma' },
+      { label: 'Fractal Tree', value: 'fractal_tree' },
+      { label: 'Floating Orbs', value: 'floating_orbs' },
+      { label: 'Abstract Clouds', value: 'abstract_clouds' },
+      { label: 'Solar Flare', value: 'solar_flare' },
+      { label: 'Kaleido Mesh', value: 'kaleido_mesh' },
+      { label: 'Neural Net', value: 'neural_net' },
+      { label: 'Digital Rain', value: 'digital_rain' },
+      { label: 'Matrix Rain', value: 'matrix' },
+      { label: 'Fire', value: 'fire' },
+      { label: 'Nebula Cloud', value: 'nebula_cloud' },
+    ]
+  },
+  {
+    name: 'Creative & Experimental',
+    options: [
+      { label: 'Vaporwave Grid', value: 'vaporwave_grid' },
+      { label: 'Geometric Bloom', value: 'geometric_bloom' },
+      { label: 'Neural Pulse', value: 'neural_pulse' },
+      { label: 'Quantum Foam', value: 'quantum_foam' },
+      { label: 'Data Stream', value: 'data_stream' },
+      { label: 'Infinite Zoom', value: 'infinite_zoom' },
+      { label: 'Reactive Smoke', value: 'reactive_smoke' },
+      { label: 'Cyber Shield', value: 'cyber_shield' },
+      { label: 'Audio Origami', value: 'audio_origami' },
+      { label: 'Stellar Core', value: 'stellar_core' },
+      { label: 'Cyber City Flyover', value: 'cyber_city_flyover' },
+      { label: 'Kaleido Tunnel', value: 'kaleido_tunnel' },
+      { label: 'VHS Glitch Field', value: 'vhs_glitch_field' },
+      { label: 'Celestial Clock', value: 'celestial_clock' },
+      { label: 'Liquid Metal Blob', value: 'liquid_metal_blob' },
+      { label: 'Neural Storm', value: 'neural_storm' },
+      { label: 'Particle Shatter', value: 'particle_shatter' },
+      { label: 'Circuit Board', value: 'circuit_board' },
+      { label: 'Geometric Kaleidoscope', value: 'geometric_kaleidoscope' },
+      { label: 'Matrix Tunnel', value: 'matrix_tunnel' },
+      { label: 'Neon Butterfly', value: 'neon_butterfly' },
+      { label: 'Voxel Terrain', value: 'voxel_terrain' },
+      { label: 'Glitch Portraits', value: 'glitch_portraits' },
+      { label: 'Poly Pulse', value: 'poly_pulse' },
+      { label: 'Retro Wave Sun', value: 'retro_wave_sun' },
+      { label: 'Energy Orb', value: 'energy_orb' },
+      { label: 'Strings of Fate', value: 'strings_of_fate' },
+    ]
+  }
 ];
 
 const FADE_OPTIONS = [
@@ -271,7 +370,7 @@ function App() {
   const [batchRandomize, setBatchRandomize] = useState(false);
   const [currentBatchIndex, setCurrentBatchIndex] = useState(-1);
   const [zipProgress, setZipStatus] = useState<string | null>(null);
-  const [batchDownloadMode, setBatchDownloadMode] = useState<'zip' | 'individual'>('zip');
+  const [batchDownloadMode, setBatchDownloadMode] = useState<'zip' | 'individual'>('individual');
   
   // High-performance non-reactive storage for batch results
   const batchBlobsRef = useRef<{name: string, blob: Blob}[]>([]);
@@ -320,16 +419,16 @@ function App() {
   const getVizDefaults = (type: string) => {
     const def = { x: 50, y: 50, rot: 0, scale: 1.0, auto: false };
     const bottomTypes = [
-      'spectrum', 'bars_3d', 'matrix', 'ribbon', 'bar_rain', 'spectrum_wave', 
-      'cyber_city', 'mountain_view', 'pixel_blocks', 'aurora', 'deep_sea', 
-      'abstract_clouds', 'led_wall', 'segmented_bar', 'seismic', 'fire'
+      'spectrum', 'bars_3d', 'matrix', 'ribbon', 'bar_rain', 'spectrum_wave',
+      'cyber_city', 'mountain_view', 'pixel_blocks', 'aurora', 'deep_sea',
+      'abstract_clouds', 'led_wall', 'segmented_bar', 'seismic', 'fire', 'isometric_grid',
+      'vaporwave_grid', 'data_stream', 'reactive_smoke', 'cyber_city_flyover', 'voxel_terrain', 'strings_of_fate'
     ];
     if (bottomTypes.includes(type)) def.y = 95;
-    if (['starfield', 'neon_grid', 'star_burst', 'solar_flare'].includes(type)) def.scale = 1.5;
-    if (['particles', 'plasma', 'floating_orbs', 'gravity_well', 'techno_wires', 'neural_net', 'vector_field', 'swarm'].includes(type)) def.scale = 1.2;
-    if (['fractal_tree', 'mountain_view', 'abstract_clouds'].includes(type)) def.y = 85; 
-    return def;
-  };
+    if (['starfield', 'neon_grid', 'star_burst', 'solar_flare', 'flow_field', 'attractor', 'infinite_zoom', 'stellar_core', 'kaleido_tunnel', 'particle_shatter', 'matrix_tunnel', 'retro_wave_sun'].includes(type)) def.scale = 1.5;
+    if (['particles', 'plasma', 'floating_orbs', 'gravity_well', 'techno_wires', 'neural_net', 'vector_field', 'swarm', 'torus_3d', 'neural_pulse', 'cyber_shield', 'audio_origami', 'geometric_bloom', 'quantum_foam', 'celestial_clock', 'liquid_metal_blob', 'neural_storm', 'vhs_glitch_field', 'circuit_board', 'geometric_kaleidoscope', 'neon_butterfly', 'poly_pulse', 'glitch_portraits', 'energy_orb'].includes(type)) def.scale = 1.2;
+    if (['fractal_tree', 'mountain_view', 'abstract_clouds', 'vaporwave_grid', 'cyber_city_flyover', 'retro_wave_sun'].includes(type)) def.y = 85;
+    return def;  };
 
   const handleSetVizType = (type: string) => {
     setVizType(type);
@@ -350,7 +449,9 @@ function App() {
     setTextGradientMotion(Math.random() > 0.7);
     setTextGlow(Math.random() > 0.7);
     setTextReact(['pulse', 'jitter', 'bounce', 'flash', 'glow', 'none'][Math.floor(Math.random() * 6)]);
-    const randomType = VIZ_OPTIONS[Math.floor(Math.random() * VIZ_OPTIONS.length)].value;
+    
+    const allOptions = VIZ_CATEGORIES.flatMap(c => c.options);
+    const randomType = allOptions[Math.floor(Math.random() * allOptions.length)].value;
     const defaults = getVizDefaults(randomType);
     setVizType(randomType);
     setBarColor(randomColor());
@@ -391,14 +492,22 @@ function App() {
   // Handle Batch final ZIP download
   useEffect(() => {
     // If batch mode was turned off but we have blobs, trigger the download
-    if (!isBatchMode && batchBlobsRef.current.length > 0 && batchQueue.length > 0) {
+    if (!isBatchMode && batchBlobsRef.current.length > 0) {
       const finishBatch = async () => {
         setZipStatus('Packaging ZIP...');
-        await downloadZip(batchBlobsRef.current);
-        batchBlobsRef.current = [];
-        setBatchQueue([]);
-        setCurrentBatchIndex(-1);
-        setZipStatus(null);
+        try {
+          await downloadZip(batchBlobsRef.current);
+        } catch (err) {
+          console.error("ZIP packaging failed:", err);
+          alert("ZIP packaging failed. This usually happens when the combined video files exceed browser memory limits. Your renders have been cleared to save RAM. Please use 'Individual' download mode for large batches.");
+        } finally {
+          // ALWAYS clear blobs and status even on failure to prevent "stuck" state
+          batchBlobsRef.current = [];
+          setCurrentBatchIndex(-1);
+          setZipStatus(null);
+          setRendering(false);
+          setIsRendering(false);
+        }
       };
       finishBatch();
     }
@@ -406,8 +515,11 @@ function App() {
 
   // Handle Batch Auto-Start when audio ready
   useEffect(() => {
-    if (isBatchMode && currentBatchIndex >= 0 && isReady && audioFile && audioElement) {
+    if (isBatchMode && currentBatchIndex >= 0 && isReady && audioFile && audioElement && !rendering) {
       const timer = setTimeout(() => {
+        // Re-verify conditions after delay
+        if (!isBatchMode || currentBatchIndex < 0 || !audioElement) return;
+        
         const newDuration = audioElement.duration;
         
         // Update states explicitly so the Visualizer component is aware of the new length
@@ -415,50 +527,65 @@ function App() {
         setEndTime(newDuration);
         
         handleStartRecording(0, newDuration);
-      }, 3000);
+      }, 3500); // Slightly longer delay for stability
       
       return () => clearTimeout(timer);
     }
-  }, [currentBatchIndex, isBatchMode, isReady, !!audioFile, !!audioElement]);
+  }, [currentBatchIndex, isBatchMode, isReady, !!audioFile, !!audioElement, rendering]);
 
   const [lowResourceExport, setLowResourceExport] = useState(false);
   const [safeRender, setSafeRender] = useState(false);
 
+  const softReset = () => {
+    // Stop any active rendering/batching without reloading
+    setRendering(false);
+    setIsRendering(false);
+    setIsBatchMode(false);
+    setCurrentBatchIndex(-1);
+    setZipStatus(null);
+    batchBlobsRef.current = [];
+    stop(); // Stop audio playback
+    
+    // Brief delay to allow garbage collection
+    setTimeout(() => {
+      console.log("App soft-reset complete.");
+    }, 100);
+  };
+
   const handleStopBatch = () => {
     if (!isBatchMode) return;
     setIsBatchMode(false);
-    setZipStatus('Stopping and packaging current tracks...');
+    setZipStatus('Stopping batch...');
     
-    // If we are currently rendering, the onstop handler will trigger the final ZIP
+    // The useEffect above will handle the ZIP if we aren't rendering
+    // If we are rendering, the onstop handler will trigger the final state change
     if (!rendering) {
-      if (batchBlobsRef.current.length > 0) {
-        downloadZip(batchBlobsRef.current).then(() => {
-          batchBlobsRef.current = [];
-          setBatchQueue([]);
-          setCurrentBatchIndex(-1);
-          setZipStatus(null);
-        });
-      } else {
-        setBatchQueue([]);
-        setCurrentBatchIndex(-1);
-        setZipStatus(null);
-      }
+      setCurrentBatchIndex(-1);
+      setZipStatus(null);
+      batchBlobsRef.current = [];
     }
   };
 
   const downloadZip = async (blobs: {name: string, blob: Blob}[]) => {
+    if (blobs.length === 0) return;
     const zip = new JSZip();
     blobs.forEach(({ name, blob }) => {
       zip.file(`${name}.webm`, blob);
     });
-    // Use STORE compression to avoid massive RAM spikes during packaging
-    const content = await zip.generateAsync({ type: 'blob', compression: 'STORE' });
+    // Use STORE compression (0) to avoid massive RAM spikes during packaging
+    // Also use stream if possible (JSZip handles this internally with generateAsync)
+    const content = await zip.generateAsync({ 
+      type: 'blob', 
+      compression: 'STORE',
+      streamFiles: true 
+    });
     const url = URL.createObjectURL(content);
     const a = document.createElement('a');
     a.href = url;
     a.download = `muzyv_batch_${new Date().getTime()}.zip`;
     a.click();
-    URL.revokeObjectURL(url);
+    // Use a longer timeout for revocation to ensure the browser has started the download
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
   };
 
   const handleStartRecording = async (overrideStart?: number, overrideEnd?: number) => {
@@ -470,12 +597,16 @@ function App() {
     setRendering(true);
     setIsRendering(true);
     let canvasStream: MediaStream | null = null;
+    let recorder: MediaRecorder | null = null;
+    let dest: MediaStreamAudioDestinationNode | null = null;
 
     try {
       audioElement.pause();
       audioElement.currentTime = finalStart;
       
-      const dest = audioContext.createMediaStreamDestination();
+      if (audioContext.state === 'suspended') await audioContext.resume();
+      
+      dest = audioContext.createMediaStreamDestination();
       if (fadeGainNode) {
         fadeGainNode.connect(dest);
       } else {
@@ -486,14 +617,16 @@ function App() {
         ? ['video/webm;codecs=vp8,opus', 'video/webm']
         : ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm', 'video/mp4'];
         
-      const mimeType = types.find(t => MediaRecorder.isTypeSupported(t)) || '';
+      const mimeType = types.find(t => MediaRecorder.isTypeSupported(t)) || 'video/webm';
       canvasStream = canvasRef.current.captureStream(30); 
       
-      const recorder = new MediaRecorder(new MediaStream([
+      const combinedStream = new MediaStream([
         ...canvasStream.getVideoTracks(), 
         ...dest.stream.getAudioTracks()
-      ]), { 
-        mimeType: mimeType || 'video/webm',
+      ]);
+
+      recorder = new MediaRecorder(combinedStream, { 
+        mimeType,
         videoBitsPerSecond: safeRender ? 2000000 : (lowResourceExport ? 4000000 : 8000000)
       });
       
@@ -504,21 +637,26 @@ function App() {
 
       recorder.onerror = (e) => {
         console.error("MediaRecorder error:", e);
-        handleHardReset();
+        alert("Recording error occurred. Attempting to recover...");
+        setRendering(false);
+        setIsRendering(false);
       };
       
       recorder.onstop = async () => {
         setIsRendering(false);
         
-        // Explicitly stop all tracks to free hardware resources
-        if (canvasStream) canvasStream.getTracks().forEach(track => track.stop());
-        dest.stream.getTracks().forEach(track => track.stop());
+        // Explicitly stop all tracks to free hardware resources (GPU/Camera/Display)
+        if (canvasStream) canvasStream.getTracks().forEach(track => { track.stop(); track.enabled = false; });
+        if (dest) dest.stream.getTracks().forEach(track => { track.stop(); track.enabled = false; });
+        combinedStream.getTracks().forEach(track => { track.stop(); track.enabled = false; });
 
         if (chunks.length === 0) {
+          console.error("No chunks collected during recording");
           setRendering(false);
           return;
         }
-        const blob = new Blob(chunks, { type: mimeType || 'video/webm' });
+        
+        const blob = new Blob(chunks, { type: mimeType });
         chunks.length = 0; // Clear memory immediately
         const fileName = audioFile.name.replace(/\.[^/.]+$/, "");
 
@@ -528,13 +666,18 @@ function App() {
           a.href = url; 
           a.download = `muzyv_${fileName}.webm`; 
           a.click();
-          setTimeout(() => URL.revokeObjectURL(url), 1000);
+          setTimeout(() => URL.revokeObjectURL(url), 5000);
         } else {
           batchBlobsRef.current.push({ name: fileName, blob });
         }
         
-        if (fadeGainNode) fadeGainNode.disconnect(dest);
-        else sourceNode.disconnect(dest);
+        // Clean up audio connections
+        try {
+          if (dest) {
+            if (fadeGainNode) fadeGainNode.disconnect(dest);
+            else if (sourceNode) sourceNode.disconnect(dest);
+          }
+        } catch (err) { console.warn("Cleanup disconnect failed:", err); }
         
         stop();
         setRendering(false); 
@@ -548,18 +691,18 @@ function App() {
             setTitle(nextFile.name.replace(/\.[^/.]+$/, ""));
             if (batchRandomize) handleRandomize();
           } else {
+            // End of batch
             setIsBatchMode(false);
           }
         }
       };
 
       resetAudioForRecording(); 
-      if (audioContext.state === 'suspended') await audioContext.resume();
-
-      recorder.start(); 
+      recorder.start(1000); // Collect chunks every second to keep memory usage predictable
       
       setTimeout(async () => {
         try {
+          if (!audioElement || !recorder || recorder.state !== 'recording') return;
           audioElement.currentTime = finalStart;
           await audioElement.play();
           
@@ -568,8 +711,8 @@ function App() {
             if (stopped) return;
             stopped = true;
             setTimeout(() => {
-              if (recorder.state === 'recording') recorder.stop();
-            }, 300);
+              if (recorder && recorder.state === 'recording') recorder.stop();
+            }, 500); // Slightly more buffer at the end
             audioElement.removeEventListener('timeupdate', checkEnd);
             audioElement.removeEventListener('ended', checkEnd);
             audioElement.removeEventListener('pause', checkEnd);
@@ -584,18 +727,22 @@ function App() {
           audioElement.addEventListener('timeupdate', checkEnd);
           audioElement.addEventListener('ended', checkEnd);
           audioElement.addEventListener('pause', () => {
-            if (audioElement.currentTime < finalEnd - 0.1) console.warn("Audio paused unexpectedly");
-            checkEnd();
+            if (audioElement.currentTime < finalEnd - 0.2) {
+              console.warn("Audio paused unexpectedly, resuming for render...");
+              audioElement.play().catch(() => stopRecording());
+            } else {
+              checkEnd();
+            }
           });
 
         } catch (playErr) {
           console.error("Playback failed:", playErr);
-          recorder.stop();
+          if (recorder && recorder.state === 'recording') recorder.stop();
         }
-      }, 500);
+      }, 800);
 
     } catch (e: unknown) { 
-      console.error("Recording error:", e); 
+      console.error("Recording setup error:", e); 
       setRendering(false); 
       setIsRendering(false);
     }
@@ -677,7 +824,10 @@ function App() {
             <h1>Muzyv</h1>
             <RefreshCw size={14} style={{ marginLeft: 4, opacity: 0.5 }} />
           </div>
-          <button className="btn-secondary" onClick={handleHardReset} style={{ fontSize: '0.6rem', padding: '4px 8px', marginTop: '4px' }}>Hard Reset App</button>
+          <div style={{ display: 'flex', gap: '4px', marginTop: '4px' }}>
+            <button className="btn-secondary" onClick={softReset} style={{ fontSize: '0.6rem', padding: '4px 8px', flex: 1 }}>Soft Reset (Safe)</button>
+            <button className="btn-secondary" onClick={handleHardReset} style={{ fontSize: '0.6rem', padding: '4px 8px', flex: 1, borderColor: '#ef4444' }}>Hard Reset</button>
+          </div>
           <div className="header-controls">
             <button className="btn-icon" onClick={togglePlay} disabled={!audioFile} title="Play/Pause">
               {isPlaying ? <Pause className="lucide-icon" size={20} stroke="white" strokeWidth={2.5} /> : <Play className="lucide-icon" size={20} stroke="white" strokeWidth={2.5} />}
@@ -856,9 +1006,16 @@ function App() {
                  <span className="toggle-indicator">{vizCollapsed ? '+' : '−'}</span>
                </div>
                {!vizCollapsed && (
-                 <div className="viz-options-grid">
-                  {VIZ_OPTIONS.map((opt) => (
-                    <button key={opt.value} className={`viz-btn ${vizType === opt.value ? 'active' : ''}`} onClick={() => handleSetVizType(opt.value)}>{opt.label}</button>
+                 <div className="viz-categories-container">
+                  {VIZ_CATEGORIES.map((cat) => (
+                    <div key={cat.name} className="viz-category-section">
+                      <h4 className="viz-category-title">{cat.name}</h4>
+                      <div className="viz-options-grid">
+                        {cat.options.map((opt) => (
+                          <button key={opt.value} className={`viz-btn ${vizType === opt.value ? 'active' : ''}`} onClick={() => handleSetVizType(opt.value)}>{opt.label}</button>
+                        ))}
+                      </div>
+                    </div>
                   ))}
                 </div>
                )}
@@ -1118,12 +1275,18 @@ function App() {
                     input.accept = 'audio/*';
                     input.onchange = (e) => {
                       const files = Array.from((e.target as HTMLInputElement).files || []);
-                      if (files.length > 0) setBatchQueue(files);
+                      if (files.length > 0) setBatchQueue(prev => [...prev, ...files]);
                     };
                     input.click();
                   }}>
-                    {batchQueue.length > 0 ? `Queue: ${batchQueue.length} Tracks` : 'Upload Multiple Tracks'}
+                    {batchQueue.length > 0 ? `Queue: ${batchQueue.length} Tracks (Add More)` : 'Upload Multiple Tracks'}
                   </button>
+                  
+                  {batchQueue.length > 0 && (
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <button className="btn-secondary" style={{ flex: 1, fontSize: '0.7rem' }} onClick={() => setBatchQueue([])}>Clear Queue</button>
+                    </div>
+                  )}
                   
                   {batchQueue.length > 0 && (
                     <>
@@ -1131,8 +1294,8 @@ function App() {
                         <label className="label-row">
                           <span>Download Mode</span>
                           <select value={batchDownloadMode} onChange={(e) => setBatchDownloadMode(e.target.value as 'zip' | 'individual')}>
-                            <option value="zip">ZIP at End (Max 10-15 tracks)</option>
-                            <option value="individual">Individual (Infinite tracks - Safest)</option>
+                            <option value="individual">Individual (Safest - Downloads as it finishes)</option>
+                            <option value="zip">ZIP at End (High RAM usage)</option>
                           </select>
                         </label>
                         <label className="label-row">

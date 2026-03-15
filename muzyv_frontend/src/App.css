@@ -1,5 +1,5 @@
 /* Import Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Alfa+Slab+One&family=Amatic+SC:wght@400;700&family=Anton&family=Audiowide&family=Bangers&family=Bebas+Neue&family=Black+Ops+One&family=Bowlby+One+SC&family=Bungee+Shade&family=Cabin+Sketch:wght@400;700&family=Carter+One&family=Caveat:wght@400;700&family=Chewy&family=Cinzel:wght@400;700&family=Comfortaa:wght@400;700&family=Contrail+One&family=Cookie&family=Courgette&family=Covered+By+Your+Grace&family=Creepster&family=Dancing+Script:wght@400;700&family=Eczar:wght@400;700&family=Electrolize&family=Exo+2:wght@400;700&family=Faster+One&family=Finger+Paint&family=Fjalla+One&family=Fugaz+One&family=Gloria+Hallelujah&family=Grand+Hotel&family=Great+Vibes&family=Gruppo&family=Handlee&family=Indie+Flower&family=Inter:wght@400;600;800&family=Josefin+Sans:wght@400;700&family=Kaushan+Script&family=Lobster&family=Lobster+Two:wght@400;700&family=Luckiest+Guy&family=Megrim&family=Monoton&family=Montserrat:wght@400;700&family=New+Rocker&family=Orbitron:wght@400;700&family=Oswald:wght@400;700&family=Pacifico&family=Patrick+Hand&family=Permanent+Marker&family=Playfair+Display:wght@400;700&family=Poiret+One&family=Press+Start+2P&family=Quicksand:wght@400;700&family=Racing+Sans+One&family=Rajdhani:wght@400;700&family=Reenie+Beanie&family=Righteous&family=Roboto+Mono:wght@400;700&family=Rock+Salt&family=Russo+One&family=Sacramento&family=Satisfy&family=Shadows+Into+Light&family=Sigmar+One&family=Special+Elite&family=Syncopate:wght@400;700&family=Teko:wght@400;700&family=Titan+One&family=Ultra&family=Unica+One&family=VT323&family=Wallpoet&family=Yellowtail&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Alfa+Slab+One&family=Amatic+SC:wght@400;700&family=Anton&family=Audiowide&family=Bangers&family=Bebas+Neue&family=Black+Ops+One&family=Bowlby+One+SC&family=Bungee+Shade&family=Cabin+Sketch:wght@400;700&family=Carter+One&family=Caveat:wght@400;700&family=Chewy&family=Cinzel:wght@400;700&family=Comfortaa:wght@400;700&family=Contrail+One&family=Cookie&family=Courgette&family=Covered+By+Your+Grace&family=Creepster&family=Dancing+Script:wght@400;700&family=Eczar:wght@400;700&family=Electrolize&family=Exo+2:wght@400;700&family=Faster+One&family=Finger+Paint&family=Fjalla+One&family=Fugaz+One&family=Gloria+Hallelujah&family=Grand+Hotel&family=Great+Vibes&family=Gruppo&family=Handlee&family=Indie+Flower&family=Inter:wght@400;600;800&family=Josefin+Sans:wght@400;700&family=Kaushan+Script&family=Lobster&family=Lobster+Two:wght@400;700&family=Luckiest+Guy&family=Megrim&family=Monoton&family=Montserrat:wght@400;700&family=New+Rocker&family=Orbitron:wght@400;700&family=Oswald:wght@400;700&family=Pacifico&family=Patrick+Hand&family=Permanent+Marker&family=Playfair+Display:wght@400;700&family=Poiret+One&family=Press+Start+2P&family=Quicksand:wght@400;700&family=Racing+Sans+One&family=Rajdhani:wght@400;700&family=Reenie+Beanie&family=Righteous&family=Roboto+Mono:wght@400;700&family=Rock+Salt&family=Russo+One&family=Sacramento&family=Satisfy&family=Shadows+Into+Light&family=Sigmar+One&family=Special+Elite&family=Syncopate:wght@400;700&family=Teko:wght@400;700&family=Titan+One&family=Ultra&family=Unica+One&family=VT323&family=Wallpoet&family=Yellowtail&family=Lexend:wght@400;700&family=Poppins:wght@400;700&family=Raleway:wght@400;700&family=Open+Sans:wght@400;700&family=Lato:wght@400;700&family=Merriweather:wght@400;700&family=Noto+Sans:wght@400;700&family=Stardos+Stencil:wght@400;700&family=UnifrakturMaguntia&family=Metal+Mania&family=Nosifer&family=Frijole&family=Rye&family=Sancreek&family=Bungee&family=Bungee+Outline&family=Codystar&family=Honk&family=Bungee+Spice&family=Rubik+Glitch&family=Eater&family=Butcherman&family=Flavors&family=Shojumaru&family=MedievalSharp&display=swap');
 
 :root {
   --bg-dark: #09090b;
@@ -279,6 +279,28 @@ input[type="color"] {
 }
 
 /* Viz Style Grid */
+.viz-categories-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.viz-category-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.viz-category-title {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid var(--border);
+}
+
 .viz-options-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -385,24 +407,23 @@ input[type="color"] {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
+  padding: 1.5rem;
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 .visualizer-container {
-  max-width: 100%;
-  max-height: 100%;
   background-color: #000;
-  box-shadow: 0 0 80px rgba(0,0,0,0.8);
+  box-shadow: 0 0 60px rgba(0,0,0,0.8);
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: aspect-ratio 0.3s ease;
 }
 
 .visualizer-container canvas {
   width: 100%;
   height: 100%;
-  object-fit: contain;
   display: block;
 }
 
